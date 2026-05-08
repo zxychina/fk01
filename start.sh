@@ -25,7 +25,16 @@ echo "ARGO_TOKEN length: ${#ARGO_TOKEN}"
 echo "VLESS_DOMAIN: $VLESS_DOMAIN"
 echo "VMESS_DOMAIN: $VMESS_DOMAIN"
 echo "TROJAN_DOMAIN: $TROJAN_DOMAIN"
-echo "PREFERRED_ADDR: ${PREFERRED_ADDR:-未设置，使用各自域名}"
+
+if [ -n "$PREFERRED_ADDR" ]; then
+  echo "PREFERRED_ADDR: $PREFERRED_ADDR"
+else
+  echo "PREFERRED_ADDR: 未设置，使用各自域名"
+fi
+
+echo "VLESS_ADDR: $VLESS_ADDR"
+echo "VMESS_ADDR: $VMESS_ADDR"
+echo "TROJAN_ADDR: $TROJAN_ADDR"
 echo "============================="
 
 sed -i "s/PASTE_UUID_HERE/$UUID/g" config.json

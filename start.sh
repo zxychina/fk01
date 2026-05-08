@@ -7,15 +7,16 @@ echo "========== start.sh 已执行 =========="
 : "${TROJAN_PASSWORD:?TROJAN_PASSWORD is required}"
 : "${ARGO_TOKEN:?ARGO_TOKEN is required}"
 
-# Tunnel 域名，Host / SNI 使用
-: "${VLESS_DOMAIN:=vless.millerchen.qzz.io}"
-: "${VMESS_DOMAIN:=vmess.millerchen.qzz.io}"
-: "${TROJAN_DOMAIN:=trojan.millerchen.qzz.io}"
+: "${VLESS_DOMAIN:?VLESS_DOMAIN is required}"
+: "${VMESS_DOMAIN:?VMESS_DOMAIN is required}"
+: "${TROJAN_DOMAIN:?TROJAN_DOMAIN is required}"
 
-# 连接地址，可填写优选域名 / 优选 IP
-: "${VLESS_ADDR:=$VLESS_DOMAIN}"
-: "${VMESS_ADDR:=$VMESS_DOMAIN}"
-: "${TROJAN_ADDR:=$TROJAN_DOMAIN}"
+# 单个优选地址：
+# 如果设置了 PREFERRED_ADDR，三个协议的 address/server 都用它
+# 如果没设置，则分别使用各自域名
+VLESS_ADDR="${PREFERRED_ADDR:-$VLESS_DOMAIN}"
+VMESS_ADDR="${PREFERRED_ADDR:-$VMESS_DOMAIN}"
+TROJAN_ADDR="${PREFERRED_ADDR:-$TROJAN_DOMAIN}"
 
 echo "========== 参数检查 =========="
 echo "UUID exists"
@@ -24,12 +25,9 @@ echo "ARGO_TOKEN length: ${#ARGO_TOKEN}"
 echo "VLESS_DOMAIN: $VLESS_DOMAIN"
 echo "VMESS_DOMAIN: $VMESS_DOMAIN"
 echo "TROJAN_DOMAIN: $TROJAN_DOMAIN"
-echo "VLESS_ADDR: $VLESS_ADDR"
-echo "VMESS_ADDR: $VMESS_ADDR"
-echo "TROJAN_ADDR: $TROJAN_ADDR"
+echo "PREFERRED_ADDR: ${PREFERRED_ADDR:-未设置，使用各自域名}"
 echo "============================="
 
-# 替换配置文件
 sed -i "s/PASTE_UUID_HERE/$UUID/g" config.json
 sed -i "s/PASTE_TROJAN_PASSWORD_HERE/$TROJAN_PASSWORD/g" config.json
 
@@ -51,11 +49,12 @@ echo "VMess 参数:"
 echo "地址: $VMESS_ADDR"
 echo "端口: 443"
 echo "UUID: $UUID"
+echo "alterId: 0"
+echo "传输: ws"
+echo "路径: /vmess"
+echo "TLS: tls"
 echo "Host: $VMESS_DOMAIN"
 echo "SNI: $VMESS_DOMAIN"
-echo "Path: /vmess"
-echo "TLS: tls"
-echo "Network: ws"
 
 echo "=============================="
 

@@ -7,7 +7,7 @@ ARG SING_BOX_VERSION=1.10.1
 ARG CLOUDFLARED_VERSION=2026.5.2
 
 # 安装必要的下载工具和基础库
-RUN apk add --no-cache ca-certificates bash wget tar curl awk
+RUN apk add --no-cache ca-certificates bash wget tar curl gawk
 
 WORKDIR /app
 

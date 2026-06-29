@@ -29,32 +29,35 @@ if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; th
 
   # 可自定义列表（空格分隔），默认包含网络公开收集的优选域名和IP
   # 来源：https://bestcf.pages.dev/domain/all.txt 和 ygkkk 优选列表
-  IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com cloudflare-eth.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz yg1.ygkkk.dpdns.org yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org yg6.ygkkk.dpdns.org yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org yg12.ygkkk.dpdns.org yg13.ygkkk.dpdns.org 162.159.197.1 162.159.198.1 104.16.0.0 104.17.0.0 172.64.0.0}"
+  IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com cloudflare-eth.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz yg1.ygkkk.dpdns.org yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org yg6.ygkkk.dpdns.org yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org yg12.ygkkk.dpdns.org yg13.ygkkk.dpdns.org cf.877774.xyz cf.090227.xyz cf.tencentapp.cn ct.877774.xyz www.visa.cn}"
 
-  BEST_IP=""
-  BEST_TIME=9999
-  INDEX=0
+  TOTAL=$(echo "$IP_LIST" | wc -w)
+  echo "正在测试 $TOTAL 个地址..."
+  RESULTS=""
 
+  # 收集所有测速结果
   for IP in $IP_LIST; do
-    INDEX=$((INDEX + 1))
-    # 用 curl 测试 TCP 连接时间（https 握手会失败，但 TCP 连接时间足够参考）
     TIME=$(curl -o /dev/null -s -w '%{time_connect}' --connect-timeout 2 "https://$IP" 2>/dev/null || echo "9999")
     if [ "$TIME" != "9999" ]; then
-      # awk 浮点数比较
-      BETTER=$(echo "$TIME $BEST_TIME" | awk '{if ($1 < $2) print 1; else print 0}')
-      if [ "$BETTER" = "1" ]; then
-        BEST_TIME=$TIME
-        BEST_IP=$IP
-        echo "  [${INDEX}] $IP - ${TIME}s (当前最优)"
-      else
-        echo "  [${INDEX}] $IP - ${TIME}s"
-      fi
+      RESULTS="$RESULTS$IP|$TIME"$'\n'
     fi
   done
 
-  if [ -n "$BEST_IP" ]; then
-    echo "✓ 优选IP: $BEST_IP (延迟: ${BEST_TIME}s)"
-    PREFERRED_ADDR="$BEST_IP"
+  # 按延迟排序并取前15
+  BEST_LIST=$(echo "$RESULTS" | sort -t'|' -k2 -n | head -15)
+
+  COUNT=$(echo "$BEST_LIST" | grep -c '|' || true)
+  if [ "$COUNT" -gt 0 ]; then
+    echo ""
+    echo "延迟最低的前 $COUNT 个地址:"
+    echo "$BEST_LIST" | awk -F'|' '{printf "  %s - %.4fs\n", $1, $2}'
+    echo ""
+
+    # 从 top 列表中随机选一个
+    PICK_INDEX=$(( (RANDOM % COUNT) + 1 ))
+    PREFERRED_ADDR=$(echo "$BEST_LIST" | sed -n "${PICK_INDEX}p" | cut -d'|' -f1)
+    PICK_TIME=$(echo "$BEST_LIST" | sed -n "${PICK_INDEX}p" | cut -d'|' -f2)
+    echo "✓ 随机选中: $PREFERRED_ADDR (延迟: ${PICK_TIME}s, 共 $COUNT 个候选)"
   else
     echo "✗ 未检测到可用优选IP，使用默认域名"
   fi

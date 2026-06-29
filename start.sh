@@ -143,6 +143,7 @@ else
   # 没有优选IP时，只使用当前地址
   ALL_IPS="$VLESS_DOMAIN"
   IP_COUNT=1
+  echo "$VLESS_DOMAIN" > "$TOP_IPS_FILE"
   echo "未检测到优选IP，使用单节点订阅..."
 fi
 
@@ -165,7 +166,7 @@ while IFS= read -r IP; do
   # VMess 节点
   VMESS_URI="vmess://$(printf '{"v":"2","ps":"VMess-%s","add":"%s","port":"443","id":"%s","aid":"0","scy":"auto","net":"ws","type":"none","host":"%s","path":"/vmess","tls":"tls","sni":"%s"}' "$PAD" "$IP" "$UUID" "$VMESS_DOMAIN" "$VMESS_DOMAIN" | base64 -w 0)"
   echo "$VMESS_URI" >> "$SUBSCRIBE_DIR/nodes.txt"
-done <<< "$ALL_IPS"
+done < /tmp/top_ips.txt
 
 TOTAL_NODES=$(( INDEX * 3 ))
 echo "已生成 $TOTAL_NODES 个节点（${INDEX}个地址 × 3种协议）"
@@ -228,7 +229,7 @@ while IFS= read -r IP; do
         Host: $TROJAN_DOMAIN
     servername: $TROJAN_DOMAIN
 YAML
-done <<< "$ALL_IPS"
+done < /tmp/top_ips.txt
 
 # 复制 subscribe.txt 作为默认首页
 cp "$SUBSCRIBE_DIR/subscribe.txt" "$SUBSCRIBE_DIR/index.html"

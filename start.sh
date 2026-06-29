@@ -43,8 +43,8 @@ if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; th
     fi
   done
 
-  # 按延迟排序并取前15
-  BEST_LIST=$(echo "$RESULTS" | sort -t'|' -k2 -n | head -15)
+  # 按延迟排序并取前5
+  BEST_LIST=$(echo "$RESULTS" | sort -t'|' -k2 -n | head -5)
 
   COUNT=$(echo "$BEST_LIST" | grep -c '|' || true)
   if [ "$COUNT" -gt 0 ]; then

@@ -1,6 +1,16 @@
 #!/bin/sh
 set -e
 
+# 优雅退出：收到 SIGTERM 时，先停所有子进程再退出
+cleanup() {
+  echo "收到关闭信号，正在停止进程..."
+  kill $(jobs -p) 2>/dev/null || true
+  wait
+  echo "所有进程已停止，退出。"
+  exit 0
+}
+trap cleanup TERM INT
+
 echo "========== start.sh 已执行 =========="
 
 : "${UUID:?UUID is required}"
@@ -198,12 +208,30 @@ echo "=============================="
 
 echo "Starting subscription HTTP server on :8088..."
 busybox httpd -p 8088 -h "$SUBSCRIBE_DIR" &
-echo "Subscription HTTP server started."
+HTTPD_PID=$!
+sleep 1
+if kill -0 $HTTPD_PID 2>/dev/null; then
+  echo "Subscription HTTP server started (PID: $HTTPD_PID)."
+else
+  echo "警告: 订阅 HTTP 服务器启动失败，端口 8088 可能被占用。"
+fi
 
 echo "Starting sing-box..."
 sing-box run -c config.json &
+SINGBOX_PID=$!
 
-sleep 3
+# 轮询检测 sing-box 端口就绪，最长等30秒
+echo "等待 sing-box 就绪..."
+for i in $(seq 1 30); do
+  if busybox nc -z 127.0.0.1 8080 2>/dev/null; then
+    echo "sing-box 已就绪（等待 ${i}s）。"
+    break
+  fi
+  if [ $i -eq 30 ]; then
+    echo "警告: sing-box 未能在30秒内就绪，继续启动..."
+  fi
+  sleep 1
+done
 
 echo "Starting cloudflared..."
 cloudflared tunnel --no-autoupdate run --token "$ARGO_TOKEN"

@@ -7,7 +7,7 @@ ARG SING_BOX_VERSION=1.10.1
 ARG CLOUDFLARED_VERSION=2026.5.2
 
 # 安装必要的下载工具和基础库
-RUN apk add --no-cache ca-certificates bash wget tar curl gawk
+RUN apk add --no-cache ca-certificates bash wget tar curl gawk haproxy
 
 WORKDIR /app
 
@@ -30,7 +30,7 @@ RUN chmod +x /usr/local/bin/sing-box && \
     chmod +x start.sh
 
 # 声明端口
-EXPOSE 8080 8088
+EXPOSE 7080 8080 8088
 
 # 启动脚本
 CMD ["./start.sh"]

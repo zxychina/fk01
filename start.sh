@@ -196,10 +196,17 @@ echo "✦ 节点URI:   http://localhost:8088/nodes.txt"
 echo ""
 echo "📌 公开订阅链接使用方法:"
 echo "   在 Cloudflare Tunnel 仪表盘中添加一个 Public Hostname:"
-echo "     服务指向 → localhost:8088"
-echo "   然后订阅地址为:"
-echo "     https://你的域名/subscribe.txt  (通用订阅)"
-echo "     https://你的域名/clash.yaml     (Clash 订阅)"
+echo "     服务指向 → localhost:7080"
+echo "   HAProxy 会自动按路径分发:"
+echo "     /vless        → sing-box VLESS (8080)"
+echo "     /vmess        → sing-box VMess (8081)"
+echo "     /trojan       → sing-box Trojan (8082)"
+echo "     其他路径       → 订阅服务 (8088)"
+echo "   然后节点地址为:"
+echo "     https://你的域名 (VLESS / VMess / Trojan 共用)"
+echo "   订阅地址为:"
+echo "     https://你的域名/subscribe.txt"
+echo "     https://你的域名/clash.yaml"
 echo ""
 
 echo "订阅文件已生成到 $SUBSCRIBE_DIR"
@@ -232,6 +239,10 @@ for i in $(seq 1 30); do
   fi
   sleep 1
 done
+
+echo "Starting HAProxy..."
+haproxy -f /app/haproxy.cfg
+echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081, /trojan→8082, 其他→8088"
 
 echo "Starting cloudflared..."
 cloudflared tunnel --no-autoupdate run --token "$ARGO_TOKEN"

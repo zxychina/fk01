@@ -7,7 +7,7 @@ ARG SING_BOX_VERSION=1.10.1
 ARG CLOUDFLARED_VERSION=2026.5.2
 
 # 安装必要的下载工具和基础库
-RUN apk add --no-cache ca-certificates bash wget tar curl awk
+RUN apk add --no-cache ca-certificates bash wget tar curl gawk
 
 WORKDIR /app
 
@@ -19,7 +19,7 @@ RUN wget https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERS
     rm -rf sing-box-${SING_BOX_VERSION}-linux-amd64*
 
 # 2. 下载并安装 cloudflared (对应你的 sys-service)
-RUN wget -O /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/download/v${CLOUDFLARED_VERSION}/cloudflared-linux-amd64
+RUN wget -O /usr/local/bin/cloudflared https://github.com/cloudflare/cloudflared/releases/download/${CLOUDFLARED_VERSION}/cloudflared-linux-amd64
 
 # 3. 复制你仓库里现有的配置文件 (config.json, start.sh 等)
 COPY . .

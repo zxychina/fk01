@@ -53,6 +53,9 @@ if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; th
     echo "$BEST_LIST" | awk -F'|' '{printf "  %s - %.4fs\n", $1, $2}'
     echo ""
 
+    # 保存前15个IP到临时文件（仅IP，不带延迟）
+    echo "$BEST_LIST" | cut -d'|' -f1 > /tmp/top_ips.txt
+
     # 从 top 列表中随机选一个
     PICK_INDEX=$(( (RANDOM % COUNT) + 1 ))
     PREFERRED_ADDR=$(echo "$BEST_LIST" | sed -n "${PICK_INDEX}p" | cut -d'|' -f1)
@@ -130,14 +133,42 @@ echo "========== 生成订阅文件 =========="
 SUBSCRIBE_DIR="/app/subscribe"
 mkdir -p "$SUBSCRIBE_DIR"
 
-# 生成节点URI文件（一行一个）
-cat > "$SUBSCRIBE_DIR/nodes.txt" << EOF
-vless://$UUID@$VLESS_ADDR:443?encryption=none&security=tls&sni=$VLESS_DOMAIN&type=ws&host=$VLESS_DOMAIN&path=%2Fvless#VLESS
-trojan://$TROJAN_PASSWORD@$TROJAN_ADDR:443?security=tls&sni=$TROJAN_DOMAIN&type=ws&host=$TROJAN_DOMAIN&path=%2Ftrojan#Trojan
-EOF
+# 判断是否有优选IP列表
+TOP_IPS_FILE="/tmp/top_ips.txt"
+if [ -s "$TOP_IPS_FILE" ]; then
+  ALL_IPS=$(cat "$TOP_IPS_FILE")
+  IP_COUNT=$(echo "$ALL_IPS" | wc -l)
+  echo "使用 $IP_COUNT 个优选地址生成多节点订阅..."
+else
+  # 没有优选IP时，只使用当前地址
+  ALL_IPS="$VLESS_DOMAIN"
+  IP_COUNT=1
+  echo "未检测到优选IP，使用单节点订阅..."
+fi
 
-VMESS_URI="vmess://$(printf '{"v":"2","ps":"VMess","add":"%s","port":"443","id":"%s","aid":"0","scy":"auto","net":"ws","type":"none","host":"%s","path":"/vmess","tls":"tls","sni":"%s"}' "$VMESS_ADDR" "$UUID" "$VMESS_DOMAIN" "$VMESS_DOMAIN" | base64 -w 0)"
-echo "$VMESS_URI" >> "$SUBSCRIBE_DIR/nodes.txt"
+# 清空节点列表文件
+> "$SUBSCRIBE_DIR/nodes.txt"
+
+INDEX=0
+# 遍历每个优选地址生成节点
+while IFS= read -r IP; do
+  [ -z "$IP" ] && continue
+  INDEX=$((INDEX + 1))
+  PAD=$(printf "%02d" $INDEX)
+
+  # VLESS 节点
+  echo "vless://$UUID@$IP:443?encryption=none&security=tls&sni=$VLESS_DOMAIN&type=ws&host=$VLESS_DOMAIN&path=%2Fvless#VLESS-${PAD}" >> "$SUBSCRIBE_DIR/nodes.txt"
+
+  # Trojan 节点
+  echo "trojan://$TROJAN_PASSWORD@$IP:443?security=tls&sni=$TROJAN_DOMAIN&type=ws&host=$TROJAN_DOMAIN&path=%2Ftrojan#Trojan-${PAD}" >> "$SUBSCRIBE_DIR/nodes.txt"
+
+  # VMess 节点
+  VMESS_URI="vmess://$(printf '{"v":"2","ps":"VMess-%s","add":"%s","port":"443","id":"%s","aid":"0","scy":"auto","net":"ws","type":"none","host":"%s","path":"/vmess","tls":"tls","sni":"%s"}' "$PAD" "$IP" "$UUID" "$VMESS_DOMAIN" "$VMESS_DOMAIN" | base64 -w 0)"
+  echo "$VMESS_URI" >> "$SUBSCRIBE_DIR/nodes.txt"
+done <<< "$ALL_IPS"
+
+TOTAL_NODES=$(( INDEX * 3 ))
+echo "已生成 $TOTAL_NODES 个节点（${INDEX}个地址 × 3种协议）"
 
 # 标准订阅（base64 编码节点列表，v2rayN 等客户端可用）
 base64 -w 0 "$SUBSCRIBE_DIR/nodes.txt" > "$SUBSCRIBE_DIR/subscribe.txt"
@@ -147,9 +178,18 @@ cat > "$SUBSCRIBE_DIR/clash.yaml" << YAML
 mixed-port: 7890
 mode: rule
 proxies:
-  - name: VLESS
+YAML
+
+INDEX=0
+while IFS= read -r IP; do
+  [ -z "$IP" ] && continue
+  INDEX=$((INDEX + 1))
+  PAD=$(printf "%02d" $INDEX)
+
+  cat >> "$SUBSCRIBE_DIR/clash.yaml" << YAML
+  - name: VLESS-${PAD}
     type: vless
-    server: $VLESS_ADDR
+    server: $IP
     port: 443
     uuid: $UUID
     network: ws
@@ -160,9 +200,9 @@ proxies:
       headers:
         Host: $VLESS_DOMAIN
     servername: $VLESS_DOMAIN
-  - name: VMess
+  - name: VMess-${PAD}
     type: vmess
-    server: $VMESS_ADDR
+    server: $IP
     port: 443
     uuid: $UUID
     alterId: 0
@@ -174,9 +214,9 @@ proxies:
       headers:
         Host: $VMESS_DOMAIN
     servername: $VMESS_DOMAIN
-  - name: Trojan
+  - name: Trojan-${PAD}
     type: trojan
-    server: $TROJAN_ADDR
+    server: $IP
     port: 443
     password: $TROJAN_PASSWORD
     network: ws
@@ -188,6 +228,7 @@ proxies:
         Host: $TROJAN_DOMAIN
     servername: $TROJAN_DOMAIN
 YAML
+done <<< "$ALL_IPS"
 
 # 复制 subscribe.txt 作为默认首页
 cp "$SUBSCRIBE_DIR/subscribe.txt" "$SUBSCRIBE_DIR/index.html"

@@ -22,14 +22,14 @@ echo "========== start.sh 已执行 =========="
 : "${TROJAN_DOMAIN:?TROJAN_DOMAIN is required}"
 
 # ========== 自动优选IP检测 ==========
-# 设置 AUTO_PREFERRED_IP=true 启用此功能
-# 自动从列表中测试并选择延迟最低的 Cloudflare IP
-if [ "${AUTO_PREFERRED_IP:-false}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; then
+# 默认启用，可通过设置 AUTO_PREFERRED_IP=false 关闭
+# 自动从列表中测试并选择延迟最低的 Cloudflare 优选地址（IP或域名均可）
+if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; then
   echo "========== 自动检测优选IP =========="
 
-  # 常见优选IP列表（来源：网络公开收集的 Cloudflare 优选 IP）
-  # 可在环境变量 PREFERRED_IP_LIST 中自定义列表（空格分隔）
-  IP_LIST="${PREFERRED_IP_LIST:-104.16.0.0 104.17.0.0 104.18.0.0 104.19.0.0 104.20.0.0 104.21.0.0 104.22.0.0 104.23.0.0 104.24.0.0 104.25.0.0 104.26.0.0 104.27.0.0 162.159.192.0 162.159.193.0 172.64.0.0}"
+  # 可自定义列表（空格分隔），默认包含网络公开收集的优选域名和IP
+  # 来源：https://bestcf.pages.dev/domain/all.txt 和 ygkkk 优选列表
+  IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com cloudflare-eth.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz yg1.ygkkk.dpdns.org yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org yg6.ygkkk.dpdns.org yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org yg12.ygkkk.dpdns.org yg13.ygkkk.dpdns.org 162.159.197.1 162.159.198.1 104.16.0.0 104.17.0.0 172.64.0.0}"
 
   BEST_IP=""
   BEST_TIME=9999

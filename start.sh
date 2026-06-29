@@ -214,7 +214,7 @@ echo "订阅文件已生成到 $SUBSCRIBE_DIR"
 echo "=============================="
 
 echo "Starting subscription HTTP server on :8088..."
-busybox httpd -p 8088 -h "$SUBSCRIBE_DIR" &
+python3 -m http.server 8088 --directory "$SUBSCRIBE_DIR" &
 HTTPD_PID=$!
 sleep 1
 if kill -0 $HTTPD_PID 2>/dev/null; then

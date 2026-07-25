@@ -13,6 +13,21 @@ trap cleanup TERM INT
 
 echo "========== start.sh 已执行 =========="
 
+# 调试：打印所有环境变量名（不打印值，避免泄露敏感信息）
+echo "========== 环境变量检查 =========="
+echo "当前环境变量列表:"
+env | grep -o '^[^=]*' | sort | while read -r name; do
+  case "$name" in
+    UUID|TROJAN_PASSWORD|ARGO_TOKEN|VLESS_DOMAIN|VMESS_DOMAIN|TROJAN_DOMAIN)
+      echo "  ✓ $name (已设置, 长度: ${#!name})"
+      ;;
+    *)
+      echo "  - $name"
+      ;;
+  esac
+done
+echo "=================================="
+
 : "${UUID:?UUID is required}"
 : "${TROJAN_PASSWORD:?TROJAN_PASSWORD is required}"
 : "${ARGO_TOKEN:?ARGO_TOKEN is required}"

@@ -32,5 +32,5 @@ RUN chmod +x /usr/local/bin/sing-box && \
 # 声明端口
 EXPOSE 7080 8080 8088
 
-# 启动脚本
-CMD ["./start.sh"]
+# 启动脚本（使用 exec 确保信号正确传递，显式加载环境变量）
+CMD ["sh", "-c", "exec ./start.sh"]

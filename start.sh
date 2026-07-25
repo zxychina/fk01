@@ -46,9 +46,9 @@ echo "=================================="
 if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; then
   echo "========== 自动检测优选IP =========="
 
-  # 可自定义列表（空格分隔），默认包含网络公开收集的优选域名和IP
-  # 来源：https://bestcf.pages.dev/domain/all.txt 和 ygkkk 优选列表
-  IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com cloudflare-eth.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz yg1.ygkkk.dpdns.org yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org yg6.ygkkk.dpdns.org yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org yg12.ygkkk.dpdns.org yg13.ygkkk.dpdns.org cf.877774.xyz cf.090227.xyz cf.tencentapp.cn ct.877774.xyz www.visa.cn}"
+  # 可自定义列表（空格分隔），默认优选15个低延迟 Cloudflare 节点
+  # 覆盖官方域名、企业域名、教育域名、第三方优选等多种类型
+  IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz cf.090227.xyz cf.tencentapp.cn ct.877774.xyz www.visa.cn}"
 
   TOTAL=$(echo "$IP_LIST" | wc -w)
   echo "正在测试 $TOTAL 个地址（并行测速，测量 TLS 真实连接延迟）..."

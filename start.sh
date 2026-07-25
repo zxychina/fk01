@@ -72,7 +72,7 @@ if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; th
     echo "$BEST_LIST" | awk -F'|' '{printf "  %s - %.4fs\n", $1, $2}'
     echo ""
 
-    # 保存前15个IP到临时文件（仅IP，不带延迟）
+    # 保存前5个IP到临时文件（仅IP，不带延迟）
     echo "$BEST_LIST" | cut -d'|' -f1 > /tmp/top_ips.txt
 
     # 从 top 列表中随机选一个

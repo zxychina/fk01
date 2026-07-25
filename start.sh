@@ -46,9 +46,9 @@ echo "=================================="
 if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; then
   echo "========== 自动检测优选IP =========="
 
-  # 可自定义列表（空格分隔），默认优选15个低延迟 Cloudflare 节点
-  # 按 TLS 握手延迟排序，含 IP + 域名混合
-  IP_LIST="${PREFERRED_IP_LIST:-162.159.193.1 162.159.197.1 162.159.198.1 cf.tencentapp.cn cloudflare.182682.xyz cm.cloudflare.byoip.top cmcc.877774.xyz ct.877774.xyz ct.cloudflare.byoip.top cu.877774.xyz cu.cloudflare.byoip.top r2.dev static.cloudflareinsights.com cf.877774.xyz www.shopify.com}"
+  # 可自定义列表（空格分隔），默认优选15个低延迟 Cloudflare 域名
+  # 按 TLS 握手延迟排序，全部使用域名避免 IP 被封
+  IP_LIST="${PREFERRED_IP_LIST:-cf.tencentapp.cn cloudflare.182682.xyz cm.cloudflare.byoip.top cmcc.877774.xyz ct.877774.xyz ct.cloudflare.byoip.top cu.877774.xyz cu.cloudflare.byoip.top r2.dev static.cloudflareinsights.com cf.877774.xyz www.shopify.com www.asda.com www.emerson.com markmonitor.com}"
 
   TOTAL=$(echo "$IP_LIST" | wc -w)
   echo "正在测试 $TOTAL 个地址（并行测速，测量 TLS 真实连接延迟）..."

@@ -51,16 +51,40 @@ if [ "${AUTO_PREFERRED_IP:-true}" = "true" ] && [ -z "${PREFERRED_ADDR:-}" ]; th
   IP_LIST="${PREFERRED_IP_LIST:-cloudflare.com cloudflare.net pages.dev r2.dev cdnjs.com cloudflare-eth.com static.cloudflareinsights.com cdn.jsdelivr.net www.speedtest.net skk.moe bestcf.030101.xyz cf.877774.xyz yg1.ygkkk.dpdns.org yg2.ygkkk.dpdns.org yg3.ygkkk.dpdns.org yg4.ygkkk.dpdns.org yg5.ygkkk.dpdns.org yg6.ygkkk.dpdns.org yg7.ygkkk.dpdns.org yg8.ygkkk.dpdns.org yg9.ygkkk.dpdns.org yg10.ygkkk.dpdns.org yg11.ygkkk.dpdns.org yg12.ygkkk.dpdns.org yg13.ygkkk.dpdns.org cf.877774.xyz cf.090227.xyz cf.tencentapp.cn ct.877774.xyz www.visa.cn}"
 
   TOTAL=$(echo "$IP_LIST" | wc -w)
-  echo "正在测试 $TOTAL 个地址..."
-  RESULTS=""
+  echo "正在测试 $TOTAL 个地址（并行测速，测量 TLS 真实连接延迟）..."
 
-  # 收集所有测速结果
+  # 并行测速：每个地址后台执行，测量 TLS 握手完成时间 (time_appconnect)
+  # time_connect 只测 TCP 握手，time_appconnect 测到 TLS 握手完成，更接近真实代理连接延迟
+  TEST_DIR="/tmp/speedtest"
+  rm -rf "$TEST_DIR"
+  mkdir -p "$TEST_DIR"
+
   for IP in $IP_LIST; do
-    TIME=$(curl -o /dev/null -s -w '%{time_connect}' --connect-timeout 2 "https://$IP" 2>/dev/null || echo "9999")
-    if [ "$TIME" != "9999" ]; then
-      RESULTS="$RESULTS$IP|$TIME"$'\n'
+    (
+      # --head 只取响应头，减少传输量；max-time 限制整个请求总时长
+      TIME=$(curl -o /dev/null -s -w '%{time_appconnect}' \
+        --connect-timeout 3 --max-time 5 \
+        -k "https://$IP" 2>/dev/null || echo "9999")
+      if [ "$TIME" != "000000.000000" ] && [ -n "$TIME" ]; then
+        echo "$TIME" > "$TEST_DIR/$IP"
+      fi
+    ) &
+  done
+
+  # 等待所有测速任务完成
+  wait
+
+  # 汇总结果：地址|延迟
+  RESULTS=""
+  for IP in $IP_LIST; do
+    if [ -f "$TEST_DIR/$IP" ]; then
+      TIME=$(cat "$TEST_DIR/$IP")
+      if [ "$TIME" != "9999" ]; then
+        RESULTS="$RESULTS$IP|$TIME"$'\n'
+      fi
     fi
   done
+  rm -rf "$TEST_DIR"
 
   # 按延迟排序并取前5
   BEST_LIST=$(echo "$RESULTS" | sort -t'|' -k2 -n | head -5)

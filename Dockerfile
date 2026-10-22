@@ -4,7 +4,7 @@ FROM alpine:latest
 # sing-box 版本: https://github.com/SagerNet/sing-box/releases
 # cloudflared 版本: https://github.com/cloudflare/cloudflared/releases
 ARG SING_BOX_VERSION=1.10.1
-ARG CLOUDFLARED_VERSION=2026.5.2
+ARG CLOUDFLARED_VERSION=2025.8.1
 
 # 安装必要的下载工具和基础库
 RUN apk add --no-cache ca-certificates bash wget tar curl gawk haproxy python3
@@ -34,3 +34,7 @@ EXPOSE 7080 8080 8088
 
 # 启动脚本（使用 exec 确保信号正确传递，显式加载环境变量）
 CMD ["sh", "-c", "exec ./start.sh"]
+
+# 健康检查：每 30 秒检测订阅接口
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1:8088/subscribe.txt || exit 1

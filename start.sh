@@ -36,6 +36,10 @@ echo "=================================="
 # 定时刷新间隔（小时），设为 0 则关闭定时优选
 REFRESH_INTERVAL="${REFRESH_INTERVAL:-6}"
 
+# 订阅密钥（可为空，为空则不要求认证）
+SUBSCRIBE_KEY="${SUBSCRIBE_KEY:-}"
+export SUBSCRIBE_KEY
+
 SUBSCRIBE_DIR="/app/subscribe"
 mkdir -p "$SUBSCRIBE_DIR"
 
@@ -271,10 +275,12 @@ refresh_loop() {
       sleep "$INTERVAL_SECONDS"
       echo ""
       echo "========== [定时任务] 开始刷新优选IP $(date '+%Y-%m-%d %H:%M:%S') =========="
+      set +e
       # 重新测速并更新 /tmp/top_ips.txt
       run_speedtest
       # 重新生成订阅文件
       generate_subscriptions
+      set -e
       echo "========== [定时任务] 刷新完成 $(date '+%Y-%m-%d %H:%M:%S') =========="
       echo ""
     done
@@ -374,13 +380,13 @@ print("  ✓ WARP 出站已启用，规则: 流媒体/海外域名 → warp, 国
 PYEOF
 fi
 
-echo "========== 配置检查 =========="
-if [ "$ENABLE_WARP" = "true" ]; then
-  echo "  outbounds: warp, direct (流媒体走 WARP)"
-else
-  echo "  outbounds: direct (纯代理)"
-fi
-echo "================================="
+echo "========== 配置摘要 =========="
+echo "UUID: ${#UUID} 字符"
+echo "TROJAN_PASSWORD: ${#TROJAN_PASSWORD} 字符"
+echo "ARGO_TOKEN: ${#ARGO_TOKEN} 字符"
+echo "ENABLE_WARP: ${ENABLE_WARP:-false}"
+echo "SUBSCRIBE_KEY: ${SUBSCRIBE_KEY:-未设置（订阅无需认证）}"
+echo "==============================="
 
 print_node_links
 
@@ -438,4 +444,6 @@ echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081
 refresh_loop
 
 echo "Starting cloudflared..."
-cloudflared tunnel --no-autoupdate run --token "$ARGO_TOKEN"
+cloudflared tunnel --no-autoupdate --protocol http2 --reconnect-delay 3s run --token "$ARGO_TOKEN" &
+CLOUDFLARED_PID=$!
+wait $CLOUDFLARED_PID

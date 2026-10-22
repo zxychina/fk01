@@ -4,81 +4,148 @@
 
 # 🚀 科学上网节点极速部署指南 (Sing-box + Cloudflare Tunnel)
 
-本项目提供了一个基于 Docker 容器的轻量级、高隐匿性科学上网节点部署方案。通过集成 `sing-box` 和 `cloudflared`，你可以轻松地在各类云平台（如 Koyeb、Render 等）或个人 VPS 上一键构建安全隧道。
+本项目提供了一个基于 Docker 容器的轻量级、高隐匿性科学上网节点部署方案。通过集成 `sing-box`、`cloudflared` 和 `HAProxy`，你可以轻松地在各类云平台（如 Railway、Koyeb、Render 等）或个人 VPS 上一键构建安全隧道。
 
 ## ✨ 核心特性
 
 * **轻量高效**：基于 Alpine Linux 和 Docker 构建，占用资源极低。
 * **高隐匿性**：利用 Cloudflare Tunnel 穿透内网，隐藏真实服务器 IP，有效防封锁。
-* **协议先进**：采用目前最强大的核心 `sing-box`，默认配置 VLESS 协议。
-* **自动化构建**：已配置 GitHub Actions，修改代码后自动打包 Docker 镜像到 Github Packages (`ghcr.io`)。
-* **灵活配置**：通过环境变量注入 UUID 和 Token，无需修改代码即可动态部署。
+* **协议齐全**：采用 `sing-box` 核心，支持 VLESS、VMess、Trojan 三种主流协议。
+* **优选IP自动测速**：启动时并行测量 TLS 连接延迟，随机选取最优域名，降低风控概率。
+* **定时刷新**：可配置定时任务（默认每 6 小时）自动重新优选，保持线路质量。
+* **多协议订阅**：自动生成标准订阅（base64 URI）、Clash YAML 和原始节点列表。
+* **流媒体解锁**：支持可选的 Cloudflare WARP 出站，自动分流海外域名和流媒体流量。
+* **订阅认证**：可选启用 `SUBSCRIBE_KEY`，防止订阅链接泄露导致凭证暴露。
+* **自动化构建**：已配置 GitHub Actions，推送 main 分支自动打包 Docker 镜像到 GitHub Packages (`ghcr.io`)。
+* **健康检查**：Docker HEALTHCHECK 持续监控订阅接口可用性。
+
+---
 
 ## 📦 项目结构
 
-* `Dockerfile`: 自动拉取并构建所需组件的 Docker 镜像配置。
-* `config.json`: `sing-box` 的核心路由与协议配置文件。
-* `start.sh`: 容器启动脚本，负责替换环境变量并同时运行双进程。
+| 文件 | 说明 |
+| :--- | :--- |
+| `Dockerfile` | 自动拉取 sing-box、cloudflared、haproxy，构建轻量容器镜像 |
+| `config.json` | sing-box 协议配置文件（UUID/TROJAN_PASSWORD 由启动时动态替换） |
+| `start.sh` | 容器入口脚本：测速优选 → 生成订阅 → 启动 sing-box → HAProxy → cloudflared |
+| `haproxy.cfg` | HTTP/WebSocket 路径路由 + 订阅认证控制 |
+| `.github/workflows/main.yml` | GitHub Actions 自动构建并推送 Docker 镜像到 ghcr.io |
 
 ---
 
 ## 🛠️ 部署教程
 
-本项目支持在任何兼容 Docker 的环境中部署。以下以常见云 PaaS 平台为例。
-
 ### 准备工作
 
-1.  **Cloudflare Tunnel**:
-    * 登录 [Cloudflare Zero Trust](https://dash.teams.cloudflare.com/) 面板。
-    * 导航至 **Networks** -> **Tunnels**，创建一个新的 Tunnel。
-    * 保存生成的 **Tunnel Token** (即 `ARGO_TOKEN`)。
-    * 为该 Tunnel 配置一个 Public Hostname（例如 `proxy.yourdomain.com`），并将服务指向 `http://localhost:8080`。
+1. **Cloudflare Tunnel（必选）**：
+   - 登录 [Cloudflare Zero Trust](https://dash.teams.cloudflare.com/) 面板。
+   - 导航至 **Networks** -> **Tunnels**，创建一个新的 Tunnel。
+   - 保存生成的 **Tunnel Token**（即 `ARGO_TOKEN`）。
+   - 为该 Tunnel 配置一个 **Public Hostname**（例如 `proxy.yourdomain.com`），并将服务指向 **`http://localhost:7080`**。
 
-2.  **生成 UUID**:
-    * 使用在线工具或命令行（如 `uuidgen`）生成一个符合标准格式的 UUID（例如：`123e4567-e89b-12d3-a456-426614174000`）。
+2. **生成 UUID**：
+   - 使用在线工具或命令行（如 `uuidgen`）生成一个符合标准格式的 UUID。
+
+3. **设置环境变量**：
+
+| 变量名 | 必需 | 说明 | 示例 |
+| :--- | :---: | :--- | :--- |
+| `UUID` | ✅ | 节点连接密码 | `your-uuid-here` |
+| `TROJAN_PASSWORD` | ✅ | Trojan 协议密码 | `your-password-here` |
+| `ARGO_TOKEN` | ✅ | Cloudflare Tunnel Token | `eyJh...` |
+| `VLESS_DOMAIN` | ✅ | VLESS 协议 SNI/Host 域名 | `a.b.c.d` |
+| `VMESS_DOMAIN` | ✅ | VMess 协议 SNI/Host 域名 | `e.f.g.h` |
+| `TROJAN_DOMAIN` | ✅ | Trojan 协议 SNI/Host 域名 | `i.j.k.l` |
+| `SUBSCRIBE_KEY` | ⚪ | 订阅认证密钥，为空则无需认证 | `my-secret-key` |
+| `ENABLE_WARP` | ⚪ | 是否启用 Cloudflare WARP 出站 | `true` 或 `false` |
+| `REFRESH_INTERVAL` | ⚪ | 定时优选间隔（小时），`0` 关闭 | `6` |
+| `PREFERRED_IP_LIST` | ⚪ | 自定义测速列表（空格分隔域名） | `cf.tencentapp.cn cloudflare.182682.xyz` |
+
+> 💡 **订阅使用方法**：若设置了 `SUBSCRIBE_KEY`，请求订阅时需携带 `X-Key` 请求头，或在 URL 中使用 `?key=` 参数：
+> ```
+> https://你的域名/subscribe.txt?key=你的密钥
+> https://你的域名/clash.yaml?key=你的密钥
+> ```
 
 ### 开始部署
 
-在部署平台（如 Koyeb）创建新应用时，请确保设置以下**环境变量 (Environment Variables)**：
-
-| 变量名 | 说明 | 示例 |
-| :--- | :--- | :--- |
-| `UUID` | 你的节点连接密码 | `你的随机UUID` |
-| `ARGO_TOKEN` | Cloudflare Tunnel 的 Token | `eyJh...` |
-
-uuid生成器 [点击生成](https://99688988.xyz/uuid-generator/)
-
-*(注：部署端口默认为 `8080`，无需修改)*
-
-### 客户端连接
-
-部署成功后，在你的代理客户端（如 v2rayN, Clash 等）中添加如下节点信息：
-
-* **地址 (Address)**: 你在 Cloudflare 设置的 Public Hostname (例如 `proxy.yourdomain.com`)
-* **端口 (Port)**: `443`
-* **用户 ID (UUID)**: 你设置的 `$UUID`
-* **传输协议 (Network)**: `ws` (WebSocket)
-* **伪装域名 (SNI)**: 你的 Public Hostname
-* **底层安全 (TLS)**: 开启 (`tls`)
-
-快捷分享链接 (URI 格式) 示例
-
-如果你熟悉直接拼接链接，它大概长这个样子（把中括号里的内容替换成你的真实信息）：
-vless://你的UUID@你的Tunnel域名（或者优选域名）:443?encryption=none&security=tls&sni=你的Tunnel域名&insecure=0&allowInsecure=0&type=ws&host=你的Tunnel域名&path=%2Fvless#Railway-Singbox
-
-如果速度太慢在 地址 (Address) 可换成优选域名 [点击获取优选域名](https://kjgx668.blogspot.com/2023/08/cloudflare-ip-cloudflare-cf.html)
+在部署平台（如 Railway）创建新应用时，请填写上述环境变量，平台会自动从 GitHub 仓库构建。
 
 ---
 
-## 进阶玩法：解锁流媒体与降低风控
+## 📡 客户端连接
 
-如果你遇到节点 IP 风控过高或无法访问 ChatGPT/Netflix 的情况，可以通过修改 `config.json` 加入 Cloudflare WARP 出站。
+### 快捷分享链接
 
-具体方法：使用 WGCF 提取 WARP 的 `PrivateKey` 和 `Address` (IPv4)，将其填入 `config.json` 的 `outbounds` -> `warp` 标签下，系统即可自动将流媒体流量分流至纯净的 WARP 节点。详细教程可参考 [相关配置指南](#)。
+VLESS：
+```
+vless://你的UUID@你的Tunnel域名:443?encryption=none&security=tls&sni=你的VLESS_DOMAIN&type=ws&host=你的VLESS_DOMAIN&path=%2Fvless#Railway-VLESS
+```
+
+Trojan：
+```
+trojan://你的TROJAN_PASSWORD@你的Tunnel域名:443?security=tls&sni=你的TROJAN_DOMAIN&type=ws&host=你的TROJAN_DOMAIN&path=%2Ftrojan#Railway-Trojan
+```
+
+### 手动配置（v2rayN / Clash 等）
+
+| 字段 | 值 |
+| :--- | :--- |
+| 地址 | 你的 Public Hostname |
+| 端口 | 443 |
+| UUID | `$UUID` |
+| 传输协议 | ws |
+| 路径 | /vless |
+| SNI | `$VLESS_DOMAIN` |
+| TLS | 开启 |
+
+### 订阅链接
+
+- **标准订阅**：`https://你的域名/subscribe.txt?key=${SUBSCRIBE_KEY}`
+- **Clash 订阅**：`https://你的域名/clash.yaml?key=${SUBSCRIBE_KEY}`
+- **原始节点**：`https://你的域名/nodes.txt?key=${SUBSCRIBE_KEY}`
 
 ---
+
+## ⚙️ 进阶功能
+
+### Cloudflare WARP 出站（解锁流媒体）
+
+若需要解锁 Netflix、ChatGPT 等流媒体，设置以下环境变量：
+
+```
+ENABLE_WARP=true
+WARP_PRIVATE_KEY=你的WARP私钥
+WARP_ADDRESS=162.15.192.1  # WARP IPv4
+```
+
+生成 WARP 私钥的方法：
+
+```bash
+wg genkey | tee /tmp/private.key | wg pubkey
+# 将第一行输出设为 WARP_PRIVATE_KEY
+# 将第二行输出设为 WARP_ADDRESS（可选，默认已内置）
+```
+
+启用后，sing-box 会自动将以下域名的流量路由至 WARP：
+- YouTube、Netflix、OpenAI、Anthropic、Google Video 等
+- 国内 IP 段 (`geoip:cn`) 直连不走代理
+
+---
+
+## 🐳 Docker 构建 & GitHub Actions
+
+项目已内置 GitHub Actions，推送到 `main` 分支后会自动构建 Docker 镜像并推送到 GitHub Container Registry (`ghcr.io`)。
+
+如需手动拉取镜像：
+```bash
+docker pull ghcr.io/<你的用户名>/<仓库名>:latest
+```
+
+---
+
 > **Disclaimer**: 本项目仅供学习和交流网络协议之用，请在遵守当地法律法规的前提下使用。
 >
 > ⚠️ 严正声明 (License & Copyright)
-本项目采用 CC BY-NC 4.0 协议进行分发。
-无论你是直接 Fork、修改源码还是重新分发，都必须保留原作者的署名，且严禁用于任何商业牟利行为。一经发现侵权，作者保留追究责任的权利。
+> 本项目采用 CC BY-NC 4.0 协议进行分发。
+> 无论你是直接 Fork、修改源码还是重新分发，都必须保留原作者的署名，且严禁用于任何商业牟利行为。一经发现侵权，作者保留追究责任的权利。

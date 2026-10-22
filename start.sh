@@ -312,9 +312,75 @@ echo "============================="
 sed -i "s/PASTE_UUID_HERE/$UUID/g" config.json
 sed -i "s/PASTE_TROJAN_PASSWORD_HERE/$TROJAN_PASSWORD/g" config.json
 
-echo "========== Final config.json =========="
-cat config.json
-echo "======================================="
+# 若启用 WARP 出站，注入 outbounds 和 rules
+if [ "$ENABLE_WARP" = "true" ]; then
+  echo "正在注入 Cloudflare WARP 出站配置..."
+  python3 << 'PYEOF'
+import json, os
+with open('/app/config.json') as f:
+    cfg = json.load(f)
+
+warp = {
+    "type": "wireguard",
+    "tag": "warp",
+    "inbound_tag": [],
+    "private_key": os.environ["WARP_PRIVATE_KEY"],
+    "address": ["%s/32" % os.environ["WARP_ADDRESS"]],
+    "mtu": 1280,
+    "interfaces": [{"address": "172.16.0.2/32"}],
+    "peers": [{
+        "public_key": os.environ.get("WARP_PUBLIC_KEY") or "BMVVBJDPv1oLcwyifXndDLqlkq9PJcN17hRbCRr05Kj+Lu3TlY67r43Rr5UyjPv24oQ=",
+        "endpoint": os.environ.get("WARP_ENDPOINT") or "relay.warp.plus:2408",
+        "allowed_ips": ["0.0.0.0/0", "::/0"]
+    }]
+}
+cfg["outbounds"] = [warp] + cfg.get("outbounds", [{"type": "direct", "tag": "direct"}])
+
+stream_domains = [
+    ".googlevideo.com", ".ytimg.com", ".ggpht.cn", ".gvt1.com",
+    ".youtube.com", ".googleusercontent.com", ".doubleclick.net",
+    ".netflix.com", ".nflxvideo.net", ".nflximg.net", ".nflxext.com",
+    ".nflximage.net", ".openai.com", ".chatgpt.com", ".oaistatic.com",
+    ".oaiusercontent.com", ".anthropic.com", ".claude.ai", ".a248.e.akamai.net"
+]
+stream_outbound = os.environ.get("WARP_STREAM_OUTBOUND") or "warp"
+if "rules" not in cfg:
+    cfg["rules"] = []
+cfg["rules"].append({
+    "type": "field",
+    "geosite": ["geolocation-!cn"],
+    "outbound": "warp",
+    "disable": True
+})
+cfg["rules"].append({
+    "type": "field",
+    "domain": stream_domains,
+    "outbound": stream_outbound
+})
+cfg["rules"].append({
+    "type": "field",
+    "ip": ["geoip:private"],
+    "outbound": "direct"
+})
+cfg["rules"].append({
+    "type": "field",
+    "ip": ["geoip:cn"],
+    "outbound": "direct"
+})
+
+with open('/app/config.json', 'w') as f:
+    json.dump(cfg, f, indent=2, ensure_ascii=False)
+print("  ✓ WARP 出站已启用，规则: 流媒体/海外域名 → warp, 国内 → direct")
+PYEOF
+fi
+
+echo "========== 配置检查 =========="
+if [ "$ENABLE_WARP" = "true" ]; then
+  echo "  outbounds: warp, direct (流媒体走 WARP)"
+else
+  echo "  outbounds: direct (纯代理)"
+fi
+echo "================================="
 
 print_node_links
 

@@ -319,6 +319,11 @@ sed -i "s/PASTE_UUID_HERE/$UUID/g" config.json
 sed -i "s/PASTE_TROJAN_PASSWORD_HERE/$TROJAN_PASSWORD/g" config.json
 
 # 若启用 WARP 出站，注入 outbounds 和 rules
+if [ "$ENABLE_WARP" = "true" ] && [ -z "${WARP_PRIVATE_KEY:-}" ]; then
+  echo "⚠ 警告: ENABLE_WARP=true 但未设置 WARP_PRIVATE_KEY，已跳过 WARP 出站（使用纯直连）"
+  ENABLE_WARP=false
+fi
+
 if [ "$ENABLE_WARP" = "true" ]; then
   echo "正在注入 Cloudflare WARP 出站配置..."
   python3 << 'PYEOF'
@@ -326,57 +331,45 @@ import json, os
 with open('/app/config.json') as f:
     cfg = json.load(f)
 
+private_key = os.environ.get("WARP_PRIVATE_KEY", "")
+if not private_key:
+    raise SystemExit("WARP_PRIVATE_KEY 为空，跳过 WARP 注入")
+
 warp = {
     "type": "wireguard",
     "tag": "warp",
-    "inbound_tag": [],
-    "private_key": os.environ["WARP_PRIVATE_KEY"],
-    "address": ["%s/32" % os.environ["WARP_ADDRESS"]],
-    "mtu": 1280,
-    "interfaces": [{"address": "172.16.0.2/32"}],
-    "peers": [{
-        "public_key": os.environ.get("WARP_PUBLIC_KEY") or "BMVVBJDPv1oLcwyifXndDLqlkq9PJcN17hRbCRr05Kj+Lu3TlY67r43Rr5UyjPv24oQ=",
-        "endpoint": os.environ.get("WARP_ENDPOINT") or "relay.warp.plus:2408",
-        "allowed_ips": ["0.0.0.0/0", "::/0"]
-    }]
+    "server": os.environ.get("WARP_ENDPOINT") or "engage.cloudflareclient.com",
+    "server_port": int(os.environ.get("WARP_ENDPOINT_PORT") or 2408),
+    "local_address": ["%s/32" % (os.environ.get("WARP_ADDRESS") or "172.16.0.2")],
+    "private_key": private_key,
+    "peer_public_key": os.environ.get("WARP_PUBLIC_KEY") or "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo=",
+    "mtu": 1280
 }
 cfg["outbounds"] = [warp] + cfg.get("outbounds", [{"type": "direct", "tag": "direct"}])
 
-stream_domains = [
-    ".googlevideo.com", ".ytimg.com", ".ggpht.cn", ".gvt1.com",
-    ".youtube.com", ".googleusercontent.com", ".doubleclick.net",
-    ".netflix.com", ".nflxvideo.net", ".nflximg.net", ".nflxext.com",
-    ".nflximage.net", ".openai.com", ".chatgpt.com", ".oaistatic.com",
-    ".oaiusercontent.com", ".anthropic.com", ".claude.ai", ".a248.e.akamai.net"
+# 仅需解锁的流媒体/海外域名走 WARP，其余默认直连
+# 注意：使用 domain_suffix，不依赖 geoip/geosite 数据库（sing-box 1.10 需额外下载）
+stream_suffix = [
+    "googlevideo.com", "ytimg.com", "ggpht.cn", "gvt1.com",
+    "youtube.com", "googleusercontent.com", "doubleclick.net",
+    "netflix.com", "nflxvideo.net", "nflximg.net", "nflxext.com",
+    "nflximage.net", "openai.com", "chatgpt.com", "oaistatic.com",
+    "oaiusercontent.com", "anthropic.com", "claude.ai",
+    "a248.e.akamai.net", "spotify.com", "scdn.co", "telegram.org",
+    "t.me", "twitter.com", "x.com", "twimg.com"
 ]
 stream_outbound = os.environ.get("WARP_STREAM_OUTBOUND") or "warp"
-if "rules" not in cfg:
-    cfg["rules"] = []
-cfg["rules"].append({
-    "type": "field",
-    "geosite": ["geolocation-!cn"],
-    "outbound": "warp",
-    "disable": True
-})
-cfg["rules"].append({
-    "type": "field",
-    "domain": stream_domains,
-    "outbound": stream_outbound
-})
-cfg["rules"].append({
-    "type": "field",
-    "ip": ["geoip:private"],
-    "outbound": "direct"
-})
-cfg["rules"].append({
-    "type": "field",
-    "ip": ["geoip:cn"],
-    "outbound": "direct"
-})
+
+route = cfg.get("route", {})
+route["rules"] = [
+    {"domain_suffix": stream_suffix, "outbound": stream_outbound}
+]
+route["final"] = "direct"
+cfg["route"] = route
 
 with open('/app/config.json', 'w') as f:
     json.dump(cfg, f, indent=2, ensure_ascii=False)
-print("  ✓ WARP 出站已启用，规则: 流媒体/海外域名 → warp, 国内 → direct")
+print("  ✓ WARP 出站已启用：指定流媒体域名 → warp，其余 → direct")
 PYEOF
 fi
 

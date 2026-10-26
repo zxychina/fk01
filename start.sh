@@ -429,6 +429,28 @@ for i in $(seq 1 30); do
   sleep 1
 done
 
+# ========== 生成并注入订阅认证配置块 ==========
+# HAProxy 的 ACL 只在本 section 生效，因此认证判断必须写在 frontend 内；
+# 同时 HAProxy 不会自动展开环境变量，故在启动前把认证块注入到 haproxy.cfg 的占位符处。
+if [ -n "$SUBSCRIBE_KEY" ]; then
+  cat > /tmp/auth_block.txt <<EOF
+  # 订阅认证已启用：订阅路径需携带 X-Key 请求头（或 ?key= 由 Cloudflare 转发为头）
+  acl sub_key_match req.hdr(X-Key) -i $SUBSCRIBE_KEY
+  http-request deny deny_status 401 if is_sub !sub_key_match
+EOF
+  echo "订阅认证已启用（SUBSCRIBE_KEY 已设置）"
+else
+  echo "  # 订阅认证未启用（未设置 SUBSCRIBE_KEY，订阅公开访问）" > /tmp/auth_block.txt
+  echo "订阅认证未启用（订阅公开访问）"
+fi
+
+# 将认证块插入占位符位置（读入文件后删除占位行）
+if grep -q '#__AUTH_BLOCK__' /app/haproxy.cfg 2>/dev/null; then
+  sed -i "/#__AUTH_BLOCK__/r /tmp/auth_block.txt" /app/haproxy.cfg
+  sed -i "/#__AUTH_BLOCK__/d" /app/haproxy.cfg
+  echo "已注入订阅认证配置到 haproxy.cfg"
+fi
+
 echo "Starting HAProxy..."
 haproxy -f /app/haproxy.cfg
 echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081, /trojan→8082, 其他→8088"

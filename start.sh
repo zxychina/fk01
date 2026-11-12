@@ -36,8 +36,18 @@ echo "=================================="
 : "${VMESS_DOMAIN:?VMESS_DOMAIN is required}"
 : "${TROJAN_DOMAIN:?TROJAN_DOMAIN is required}"
 
-# 定时刷新间隔（小时），设为 0 则关闭定时优选
+# ========== 可选变量集中初始化 ==========
+# 在脚本开头一次性给所有可选变量赋默认值，避免 set -u 下裸引用触发
+# "parameter not set"。后续代码可直接裸用 $ENABLE_WARP / $REFRESH_INTERVAL 等。
+ENABLE_WARP="${ENABLE_WARP:-false}"
 REFRESH_INTERVAL="${REFRESH_INTERVAL:-6}"
+AUTO_PREFERRED_IP="${AUTO_PREFERRED_IP:-true}"
+PREFERRED_ADDR="${PREFERRED_ADDR:-}"
+WARP_PRIVATE_KEY="${WARP_PRIVATE_KEY:-}"
+WARP_ADDRESS="${WARP_ADDRESS:-}"
+WARP_PUBLIC_KEY="${WARP_PUBLIC_KEY:-}"
+WARP_ENDPOINT="${WARP_ENDPOINT:-}"
+WARP_STREAM_OUTBOUND="${WARP_STREAM_OUTBOUND:-warp}"
 
 # 订阅密钥（可为空，为空则不要求认证）
 # Railway 环境变量里如果用户不小心把注释 / 空格写进值的尾部，

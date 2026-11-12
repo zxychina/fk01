@@ -1,0 +1,188 @@
+2026-11-12T10:13:53.669014705Z [inf]  ========== start.sh 已执行 ==========
+2026-11-12T10:13:53.669021678Z [inf]  ========== 环境变量检查 ==========
+2026-11-12T10:13:53.669029346Z [inf]    ✓ UUID (已设置, 长度: 36)
+2026-11-12T10:13:53.669037658Z [inf]    ✓ TROJAN_PASSWORD (已设置, 长度: 10)
+2026-11-12T10:13:53.669045601Z [inf]    ✓ ARGO_TOKEN (已设置, 长度: 185)
+2026-11-12T10:13:53.669053122Z [inf]    ✓ VLESS_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:13:53.669061464Z [inf]    ✓ VMESS_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:13:53.669069333Z [inf]    ✓ TROJAN_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:13:53.669081219Z [inf]  ==================================
+2026-11-12T10:13:53.669089111Z [inf]  ✓ SUBSCRIBE_KEY 已设置（13 字符，已自动清理空格和注释）
+2026-11-12T10:13:53.669096679Z [inf]  ========== 自动检测优选IP ==========
+2026-11-12T10:13:53.669104705Z [inf]  正在测试 15 个地址（并行测速，测量 TLS 真实连接延迟）...
+2026-11-12T10:13:53.916989342Z [inf]  Starting Container
+2026-11-12T10:13:58.826457710Z [inf]  SUBSCRIBE_KEY: my-secret-key
+2026-11-12T10:13:58.826473970Z [inf]  ===============================
+2026-11-12T10:13:58.826486237Z [inf]  ARGO_TOKEN length: 185
+2026-11-12T10:13:58.826496212Z [inf]  VLESS_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:13:58.826502178Z [inf]  VMESS_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:13:58.826507938Z [inf]  TROJAN_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:13:58.826514118Z [inf]  PREFERRED_ADDR: cf.tencentapp.cn
+2026-11-12T10:13:58.826521317Z [inf]  VLESS_ADDR: cf.tencentapp.cn
+2026-11-12T10:13:58.826527117Z [inf]  VMESS_ADDR: cf.tencentapp.cn
+2026-11-12T10:13:58.826533151Z [inf]  TROJAN_ADDR: cf.tencentapp.cn
+2026-11-12T10:13:58.826538691Z [inf]  =============================
+2026-11-12T10:13:58.826544499Z [inf]  ========== 配置摘要 ==========
+2026-11-12T10:13:58.826550029Z [inf]  UUID: 36 字符
+2026-11-12T10:13:58.826556852Z [inf]  TROJAN_PASSWORD: 10 字符
+2026-11-12T10:13:58.826562055Z [inf]  ARGO_TOKEN: 185 字符
+2026-11-12T10:13:58.826567043Z [inf]  ENABLE_WARP: false
+2026-11-12T10:13:58.826633977Z [inf]  
+2026-11-12T10:13:58.826641387Z [inf]  延迟最低的前 4 个地址:
+2026-11-12T10:13:58.826648606Z [inf]     - 0.0000s
+2026-11-12T10:13:58.826656047Z [inf]    cf.tencentapp.cn - 0.0000s
+2026-11-12T10:13:58.826663686Z [inf]    cloudflare.182682.xyz - 0.0000s
+2026-11-12T10:13:58.826671524Z [inf]    cm.cloudflare.byoip.top - 0.0000s
+2026-11-12T10:13:58.826678527Z [inf]    cmcc.877774.xyz - 0.0000s
+2026-11-12T10:13:58.826686772Z [inf]  
+2026-11-12T10:13:58.826694664Z [inf]  ✓ 随机选中: cf.tencentapp.cn (延迟: 0.0000009999s, 共 4 个候选)
+2026-11-12T10:13:58.826700842Z [inf]  =============================
+2026-11-12T10:13:58.826707642Z [inf]  ========== 参数检查 ==========
+2026-11-12T10:13:58.826715666Z [inf]  UUID exists
+2026-11-12T10:13:58.826722552Z [inf]  TROJAN_PASSWORD exists
+2026-11-12T10:13:58.827324928Z [inf]  vmess://eyJ2IjoiMiIsInBzIjoiUmFpbHdheS1WTWVzcyIsImFkZCI6ImNmLnRlbmNlbnRhcHAuY24iLCJwb3J0IjoiNDQzIiwiaWQiOiIzZjgxMDNhYi0xNTFkLTQ4NjEtOTYwOC05MDllY2Y5OGNmMGIiLCJhaWQiOiIwIiwic2N5IjoiYXV0byIsIm5ldCI6IndzIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiZmswMS5mcXp5LmluZGV2cy5pbiIsInBhdGgiOiIvdm1lc3MiLCJ0bHMiOiJ0bHMiLCJzbmkiOiJmazAxLmZxenkuaW5kZXZzLmluIiwiYWxwbiI6IiJ9
+2026-11-12T10:13:58.827336650Z [inf]  ========== 节点链接 ==========
+2026-11-12T10:13:58.827339258Z [inf]  ==============================
+2026-11-12T10:13:58.827349233Z [inf]  VLESS:
+2026-11-12T10:13:58.827353815Z [inf]  ========== 生成订阅文件 ==========
+2026-11-12T10:13:58.827358924Z [inf]  vless://3f8103ab-151d-4861-9608-909ecf98cf0b@cf.tencentapp.cn:443?encryption=none&security=tls&sni=fk01.fqzy.indevs.in&insecure=0&allowInsecure=0&type=ws&host=fk01.fqzy.indevs.in&path=%2Fvless#Railway-VLESS
+2026-11-12T10:13:58.827368227Z [inf]  使用 5 个优选地址生成多节点订阅...
+2026-11-12T10:13:58.827371907Z [inf]  
+2026-11-12T10:13:58.827378437Z [inf]  Trojan:
+2026-11-12T10:13:58.827384682Z [inf]  trojan://zxy1474147@cf.tencentapp.cn:443?security=tls&sni=fk01.fqzy.indevs.in&insecure=0&allowInsecure=0&type=ws&host=fk01.fqzy.indevs.in&path=%2Ftrojan#Railway-Trojan
+2026-11-12T10:13:58.827390522Z [inf]  
+2026-11-12T10:13:58.827396636Z [inf]  VMess 参数:
+2026-11-12T10:13:58.827403057Z [inf]  地址: cf.tencentapp.cn
+2026-11-12T10:13:58.827409709Z [inf]  端口: 443
+2026-11-12T10:13:58.827416237Z [inf]  UUID: 3f8103ab-151d-4861-9608-909ecf98cf0b
+2026-11-12T10:13:58.827422563Z [inf]  alterId: 0
+2026-11-12T10:13:58.827428783Z [inf]  传输: ws
+2026-11-12T10:13:58.827434676Z [inf]  路径: /vmess
+2026-11-12T10:13:58.827440706Z [inf]  TLS: tls
+2026-11-12T10:13:58.827446750Z [inf]  Host: fk01.fqzy.indevs.in
+2026-11-12T10:13:58.827452981Z [inf]  SNI: fk01.fqzy.indevs.in
+2026-11-12T10:13:58.827459520Z [inf]  
+2026-11-12T10:13:58.827465756Z [inf]  VMess URI (可直接导入客户端):
+2026-11-12T10:13:58.829671257Z [inf]  已生成 12 个节点（4个地址 × 3种协议）
+2026-11-12T10:13:58.829837136Z [inf]  ✦ 标准订阅: http://localhost:8088/subscribe.txt
+2026-11-12T10:13:58.829842466Z [inf]  ✦ Clash订阅: http://localhost:8088/clash.yaml
+2026-11-12T10:13:58.829847162Z [inf]  ✦ 节点URI:   http://localhost:8088/nodes.txt
+2026-11-12T10:13:58.829853029Z [inf]  订阅文件已生成到 /app/subscribe
+2026-11-12T10:13:58.829860618Z [inf]  ==============================
+2026-11-12T10:13:58.829865760Z [inf]  
+2026-11-12T10:13:58.829871745Z [inf]  📌 公开订阅链接使用方法:
+2026-11-12T10:13:58.829876853Z [inf]     在 Cloudflare Tunnel 仪表盘中添加一个 Public Hostname:
+2026-11-12T10:13:58.829882472Z [inf]       服务指向 → localhost:7080
+2026-11-12T10:13:58.829888714Z [inf]     HAProxy 会自动按路径分发:
+2026-11-12T10:13:58.829893679Z [inf]       /vless        → sing-box VLESS (8080)
+2026-11-12T10:13:58.829899263Z [inf]       /vmess        → sing-box VMess (8081)
+2026-11-12T10:13:58.829904265Z [inf]       /trojan       → sing-box Trojan (8082)
+2026-11-12T10:13:58.829909847Z [inf]       其他路径       → 订阅服务 (8088)
+2026-11-12T10:13:58.829914508Z [inf]     然后节点地址为:
+2026-11-12T10:13:58.829921135Z [inf]       https://你的域名 (VLESS / VMess / Trojan 共用)
+2026-11-12T10:13:58.829926471Z [inf]     订阅地址为:
+2026-11-12T10:13:58.829931994Z [inf]       https://你的域名/subscribe.txt
+2026-11-12T10:13:58.829938390Z [inf]       https://你的域名/clash.yaml
+2026-11-12T10:13:58.829943940Z [inf]  
+2026-11-12T10:13:58.829949617Z [inf]  Starting subscription HTTP server on :8088...
+2026-11-12T10:13:59.271956540Z [inf]  Subscription HTTP server started (PID: 129).
+2026-11-12T10:13:59.271963412Z [inf]  Starting sing-box...
+2026-11-12T10:13:59.271968461Z [inf]  等待 sing-box 就绪...
+2026-11-12T10:13:59.281426177Z [err]  [36mINFO[0m[0000] router: updated default interface railnet0, index 3
+2026-11-12T10:13:59.281434911Z [err]  [36mINFO[0m[0000] inbound/vless[vless-in]: tcp server started at [::]:8080
+2026-11-12T10:13:59.281442296Z [err]  [36mINFO[0m[0000] inbound/vmess[vmess-in]: tcp server started at [::]:8081
+2026-11-12T10:13:59.281449593Z [err]  [36mINFO[0m[0000] inbound/trojan[trojan-in]: tcp server started at [::]:8082
+2026-11-12T10:13:59.283104165Z [err]  [36mINFO[0m[0000] sing-box started (0.00s)
+2026-11-12T10:14:00.291767546Z [inf]  sing-box 已就绪（等待 2s）。
+2026-11-12T10:14:00.291774034Z [inf]  
+2026-11-12T10:14:00.291780139Z [inf]  ✓ 订阅认证已启用（SUBSCRIBE_KEY=my-secret-key）
+2026-11-12T10:14:00.291786072Z [inf]    订阅 URL 形式1（路径前缀，所有客户端通用）:
+2026-11-12T10:14:00.291792323Z [inf]      /sub/my-secret-key/subscribe.txt
+2026-11-12T10:14:00.291798753Z [inf]      /sub/my-secret-key/clash.yaml
+2026-11-12T10:14:00.291806381Z [inf]      /sub/my-secret-key/nodes.txt
+2026-11-12T10:14:00.291813059Z [inf]    订阅 URL 形式2（query 兼容）:
+2026-11-12T10:14:00.291819326Z [inf]      /subscribe.txt?key=my-secret-key
+2026-11-12T10:14:00.291838306Z [inf]  ✓ 已注入认证配置到 haproxy.cfg
+2026-11-12T10:14:00.291845907Z [inf]  Starting HAProxy...
+2026-11-12T10:14:01.342784169Z [inf]  HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081, /trojan→8082, 其他→8088
+2026-11-12T10:14:01.342784281Z [inf]  
+2026-11-12T10:14:01.342796972Z [inf]  USAGE:
+2026-11-12T10:14:01.342799651Z [inf]  ========== 启动定时优选任务 ==========
+2026-11-12T10:14:01.342808785Z [inf]    cloudflared tunnel [tunnel command options] run [subcommand options] [TUNNEL]
+2026-11-12T10:14:01.342812633Z [inf]  每 6 小时自动刷新优选IP并更新订阅文件
+2026-11-12T10:14:01.342817457Z [inf]  
+2026-11-12T10:14:01.342821421Z [inf]  ======================================
+2026-11-12T10:14:01.342825386Z [inf]  DESCRIPTION:
+2026-11-12T10:14:01.342829950Z [inf]  定时优选任务已启动 (PID: 160)
+2026-11-12T10:14:01.342841273Z [inf]  Starting cloudflared...
+2026-11-12T10:14:01.342848966Z [inf]  Incorrect Usage: flag provided but not defined: -reconnect-delay
+2026-11-12T10:14:01.342854858Z [inf]  
+2026-11-12T10:14:01.342861156Z [inf]  NAME:
+2026-11-12T10:14:01.342867259Z [inf]    cloudflared tunnel run - Proxy a local web server by running the given tunnel
+2026-11-12T10:14:01.342916303Z [err]  [NOTICE]   (159) : haproxy version is 3.4.7-8872a26
+2026-11-12T10:14:01.342924092Z [err]  [ALERT]    (159) : config : parsing [/app/haproxy.cfg:33] : error detected while parsing ACL 'sub_match_query' : unknown fetch method 'q' in ACL expression 'q(key)'.
+2026-11-12T10:14:01.342931179Z [err]  [ALERT]    (159) : config : parsing [/app/haproxy.cfg:41] : error detected while parsing an 'http-request deny' condition : no such ACL : 'sub_match_query'.
+2026-11-12T10:14:01.342938750Z [err]  [ALERT]    (159) : config : Error(s) found in configuration file : /app/haproxy.cfg
+2026-11-12T10:14:01.342945940Z [err]  [NOTICE]   (157) : haproxy version is 3.4.7-8872a26
+2026-11-12T10:14:01.342955192Z [err]  [ALERT]    (157) : Process 159 exited with code 1 (Exit)
+2026-11-12T10:14:02.094157459Z [inf]    Runs the tunnel identified by name or UUID, creating highly available connections
+2026-11-12T10:14:02.094164313Z [inf]    between your server and the Cloudflare edge. You can provide name or UUID of tunnel to run either as the
+2026-11-12T10:14:02.094177445Z [inf]    last command line argument or in the configuration file using "tunnel: TUNNEL".
+2026-11-12T10:14:02.094184582Z [inf]  
+2026-11-12T10:14:02.094191079Z [inf]    This command requires the tunnel credentials file created when "cloudflared tunnel create" was run,
+2026-11-12T10:14:02.094197440Z [inf]    however it does not need access to cert.pem from "cloudflared login" if you identify the tunnel by UUID.
+2026-11-12T10:14:02.094203497Z [inf]    If you experience other problems running the tunnel, "cloudflared tunnel cleanup" may help by removing
+2026-11-12T10:14:02.094210620Z [inf]    any old connection records.
+2026-11-12T10:14:02.094217397Z [inf]  
+2026-11-12T10:14:02.094225504Z [inf]  
+2026-11-12T10:14:02.094231586Z [inf]  TUNNEL COMMAND OPTIONS:
+2026-11-12T10:14:02.094237593Z [inf]     --config value           Specifies a config file in YAML format.
+2026-11-12T10:14:02.094253257Z [inf]     --origincert value       Path to the certificate generated for your origin when you run cloudflared login. [$TUNNEL_ORIGIN_CERT]
+2026-11-12T10:14:02.094260378Z [inf]     --autoupdate-freq value  Autoupdate frequency. Default is 24h0m0s. (default: 24h0m0s)
+2026-11-12T10:14:02.094266731Z [inf]     --no-autoupdate          Disable periodic check for updates, restarting the server with the new version. (default: false) [$NO_AUTOUPDATE]
+2026-11-12T10:14:02.094272906Z [inf]     --metrics value          Listen address for metrics reporting. If no address is passed cloudflared will try to bind to [localhost:20241 localhost:20242 localhost:20243 localhost:20244 localhost:20245].
+2026-11-12T10:14:02.097961944Z [inf]  If all are unavailable, a random port will be used. Note that when running cloudflared from an virtual
+2026-11-12T10:14:02.097966170Z [inf]  environment the default address binds to all interfaces, hence, it is important to isolate the host
+2026-11-12T10:14:02.097970129Z [inf]  and virtualized host network stacks from each other (default: "localhost:0") [$TUNNEL_METRICS]
+2026-11-12T10:14:02.097973897Z [inf]     --pidfile value                                     Write the application's PID to this file after first successful connection. [$TUNNEL_PIDFILE]
+2026-11-12T10:14:02.097978016Z [inf]     --loglevel value                                    Application logging level {debug, info, warn, error, fatal}. At debug level cloudflared will log request URL, method, protocol, content length, as well as, all request and response headers. This can expose sensitive information in your logs. (default: "info") [$TUNNEL_LOGLEVEL]
+2026-11-12T10:14:02.097981996Z [inf]     --transport-loglevel value, --proto-loglevel value  Transport logging level(previously called protocol logging level) {debug, info, warn, error, fatal} (default: "info") [$TUNNEL_PROTO_LOGLEVEL, $TUNNEL_TRANSPORT_LOGLEVEL]
+2026-11-12T10:14:02.097986700Z [inf]     --logfile value                                     Save application log to this file for reporting issues. [$TUNNEL_LOGFILE]
+2026-11-12T10:14:02.097992067Z [inf]     --log-directory value                               Save application log to this directory for reporting issues. [$TUNNEL_LOGDIRECTORY]
+2026-11-12T10:14:02.097996642Z [inf]     --trace-output value                                Name of trace output file, generated when cloudflared stops. [$TUNNEL_TRACE_OUTPUT]
+2026-11-12T10:14:02.101501868Z [inf]     --output value                                      Output format for the logs (default, json) (default: "default") [$TUNNEL_MANAGEMENT_OUTPUT, $TUNNEL_LOG_OUTPUT]
+2026-11-12T10:14:02.101506521Z [inf]    
+2026-11-12T10:14:02.101510893Z [inf]  SUBCOMMAND OPTIONS:
+2026-11-12T10:14:02.101515647Z [inf]    --credentials-file value, --cred-file value  Filepath at which to read/write the tunnel credentials [$TUNNEL_CRED_FILE]
+2026-11-12T10:14:02.101519972Z [inf]    --credentials-contents value                 Contents of the tunnel credentials JSON file to use. When provided along with credentials-file, this will take precedence. [$TUNNEL_CRED_CONTENTS]
+2026-11-12T10:14:02.101524325Z [inf]    --post-quantum, --pq                         When given creates an experimental post-quantum secure tunnel (default: false) [$TUNNEL_POST_QUANTUM]
+2026-11-12T10:14:02.101528225Z [inf]    --features value, -F value                   Opt into various features that are still being developed or tested.  (accepts multiple inputs)
+2026-11-12T10:14:02.101532280Z [inf]    --token value                                The Tunnel token. When provided along with credentials, this will take precedence. Also takes precedence over token-file [$TUNNEL_TOKEN]
+2026-11-12T10:14:02.101537444Z [inf]    --token-file value                           Filepath at which to read the tunnel token. When provided along with credentials, this will take precedence. [$TUNNEL_TOKEN_FILE]
+2026-11-12T10:14:02.101541665Z [inf]    --icmpv4-src value                           Source address to send/receive ICMPv4 messages. If not provided cloudflared will dial a local address to determine the source IP or fallback to 0.0.0.0. [$TUNNEL_ICMPV4_SRC]
+2026-11-12T10:14:02.101546057Z [inf]    --icmpv6-src value                           Source address and the interface name to send/receive ICMPv6 messages. If not provided cloudflared will dial a local address to determine the source IP or fallback to ::. [$TUNNEL_ICMPV6_SRC]
+2026-11-12T10:14:02.104176585Z [inf]    --max-active-flows value                     Overrides the remote configuration for max active private network flows (TCP/UDP) that this cloudflared instance supports (default: 0) [$TUNNEL_MAX_ACTIVE_FLOWS]
+2026-11-12T10:14:02.104180924Z [inf]    --dns-resolver-addrs value                   Overrides the dynamic DNS resolver resolution to use these address:port's instead.  (accepts multiple inputs) [$TUNNEL_DNS_RESOLVER_ADDRS]
+2026-11-12T10:14:02.104185260Z [inf]    --url URL                                    Connect to the local webserver at URL. (default: "http://localhost:8080") [$TUNNEL_URL]
+2026-11-12T10:14:02.104189178Z [inf]    --hello-world                                Run Hello World Server (default: false) [$TUNNEL_HELLO_WORLD]
+2026-11-12T10:14:02.104194701Z [inf]    --socks5 --url                               specify if this tunnel is running as a SOCK5 Server This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_SOCKS]
+2026-11-12T10:14:02.104200588Z [inf]    --proxy-connect-timeout --url                HTTP proxy timeout for establishing a new connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)
+2026-11-12T10:14:02.104206188Z [inf]    --proxy-tls-timeout --url                    HTTP proxy timeout for completing a TLS handshake This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 10s)
+2026-11-12T10:14:02.108743080Z [inf]    --proxy-tcp-keepalive --url                  HTTP proxy TCP keepalive duration This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 30s)
+2026-11-12T10:14:02.108748535Z [inf]    --proxy-no-happy-eyeballs --url              HTTP proxy should disable "happy eyeballs" for IPv4/v6 fallback This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false)
+2026-11-12T10:14:02.108756201Z [inf]    --proxy-keepalive-connections --url          HTTP proxy maximum keepalive connection pool size This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 100)
+2026-11-12T10:14:02.108762037Z [inf]    --proxy-keepalive-timeout --url              HTTP proxy timeout for closing an idle connection This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: 1m30s)
+2026-11-12T10:14:02.108767493Z [inf]    --proxy-connection-timeout value             DEPRECATED. No longer has any effect. (default: 1m30s)
+2026-11-12T10:14:02.108773290Z [inf]    --proxy-expect-continue-timeout value        DEPRECATED. No longer has any effect. (default: 1m30s)
+2026-11-12T10:14:02.111837952Z [inf]    --no-tls-verify --url                        Disables TLS verification of the certificate presented by your origin. Will allow any certificate from the origin to be accepted. Note: The connection from your machine to Cloudflare's Edge is still encrypted. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$NO_TLS_VERIFY]
+2026-11-12T10:14:02.111864430Z [inf]    --http-host-header --url                     Sets the HTTP Host header for the local webserver. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_HTTP_HOST_HEADER]
+2026-11-12T10:14:02.111870174Z [inf]    --origin-server-name --url                   Hostname on the origin server certificate. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_SERVER_NAME]
+2026-11-12T10:14:02.111875725Z [inf]    --unix-socket value                          Path to unix socket to use instead of --url [$TUNNEL_UNIX_SOCKET]
+2026-11-12T10:14:02.111882207Z [inf]    --origin-ca-pool --url                       Path to the CA for the certificate of your origin. This option should be used only if your certificate is not signed by Cloudflare. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress [$TUNNEL_ORIGIN_CA_POOL]
+2026-11-12T10:14:02.114530061Z [inf]    --no-chunked-encoding --url                  Disables chunked transfer encoding; useful if you are running a WSGI server. This flag only takes effect if you define your origin with --url and if you do not use ingress rules. The recommended way is to rely on ingress rules and define this property under `originRequest` as per https://developers.cloudflare.com/cloudflare-one/connections/connect-apps/configuration/configuration-file/ingress (default: false) [$TUNNEL_NO_CHUNKED_ENCODING]
+2026-11-12T10:14:02.114534212Z [inf]    --http2-origin                               Enables HTTP/2 origin servers. (default: false) [$TUNNEL_ORIGIN_ENABLE_HTTP2]
+2026-11-12T10:14:02.114540579Z [inf]    --bastion                                    Runs as jump host (default: false) [$TUNNEL_BASTION]
+2026-11-12T10:14:02.114545514Z [inf]    --proxy-address value                        Listen address for the proxy. (default: "127.0.0.1") [$TUNNEL_PROXY_ADDRESS]
+2026-11-12T10:14:02.114550099Z [inf]    --proxy-port value                           Listen port for the proxy. (default: 0) [$TUNNEL_PROXY_PORT]
+2026-11-12T10:14:02.114554112Z [inf]    --help, -h                                   show help (default: false)
+2026-11-12T10:14:02.114558115Z [inf]    

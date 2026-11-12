@@ -85,7 +85,7 @@ fetch_domain_list() {
 
   REMOTE_LIST=""
   for src in $SOURCES; do
-    echo "  拉取优选域名源: $src"
+    echo "  拉取优选域名源: $src" >&2
     tmp=$(curl -sS --connect-timeout 5 --max-time 10 "$src" 2>/dev/null) || true
     if [ -n "$tmp" ]; then
       REMOTE_LIST="$REMOTE_LIST"$'\n'"$tmp"
@@ -104,13 +104,13 @@ fetch_domain_list() {
       | sort -u)
 
     COUNT=$(echo "$CLEAN" | wc -l)
-    echo "  ✓ 远程拉取成功: $COUNT 个唯一地址"
+    echo "  ✓ 远程拉取成功: $COUNT 个唯一地址" >&2
 
     # 限制最多取 MAX_TEST_COUNT（默认 40）个，避免测速太久
     MAX_TEST_COUNT="${MAX_TEST_COUNT:-40}"
     if [ "$COUNT" -gt "$MAX_TEST_COUNT" ]; then
       CLEAN=$(echo "$CLEAN" | head -"$MAX_TEST_COUNT")
-      echo "  ℹ 过多，截断为前 $MAX_TEST_COUNT 个（$COUNT 总数）"
+      echo "  ℹ 过多，截断为前 $MAX_TEST_COUNT 个（$COUNT 总数）" >&2
     fi
 
     echo "$CLEAN"

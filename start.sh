@@ -465,13 +465,18 @@ if [ -n "$SUBSCRIBE_KEY" ]; then
   KEY_REGEX=$(echo "$SUBSCRIBE_KEY" | sed 's/[.[\*^$()+?{|]/\\&/g')
   AUTH_BLOCK=$(cat <<BLOCK_EOF
   # ===== 订阅认证已启用 =====
-  # 只有 /sub/<KEY>/ 前缀是合法订阅路径
+  # 【顺序关键】先 deny 非法请求（此时仍是原始路径），再 rewrite 合法请求。
+  # 如果先 rewrite 再 deny，rewrite 后的路径会被 deny 规则误杀！
   acl sub_match_path path_beg /sub/$KEY_REGEX/
-  # rewrite：把 /sub/<KEY>/xxx 还原成 /xxx 后转发到后端 8088
-  http-request set-path %[path,regsub(^/sub/$KEY_REGEX/,/)] if sub_match_path
-  # deny：任何订阅相关路径如果不匹配 KEY → 401
+
+  # deny：
+  #   - 原始订阅路径（没有 /sub/ 前缀）一律 deny
+  #   - /sub/ 前缀但 key 不对 → deny
   http-request deny deny_status 401 if is_sub_raw
   http-request deny deny_status 401 if is_sub_path_prefix !sub_match_path
+
+  # rewrite：合法的 /sub/<KEY>/xxx → /xxx，让后端 8088 正常服务
+  http-request set-path %[path,regsub(^/sub/$KEY_REGEX/,/)] if sub_match_path
 BLOCK_EOF
 )
   echo ""
@@ -504,12 +509,24 @@ echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081
 refresh_loop
 
 echo "Starting cloudflared..."
-# cloudflared 的 flag 分层严格：
-#   - 顶层全局 flag 放最前：--no-autoupdate
-#   - `tunnel run` 子命令 flag 放 run 之后：--token / --http2-origin
-#   - ❌ 不存在 --protocol / --reconnect-delay（之前版本有，2025.8.1 已删）
-# 错误示例: cloudflared tunnel --no-autoupdate run --token ...   ❌ flag 位置错
-# 正确示例: cloudflared --no-autoupdate tunnel run --token ...   ✅
-cloudflared --no-autoupdate tunnel run --http2-origin --token "$ARGO_TOKEN" &
-CLOUDFLARED_PID=$!
-wait $CLOUDFLARED_PID
+# 命令刻意保持最保守：只用 --no-autoupdate（顶层全局）+ --token（run 子命令）。
+# 所有额外 flag（--protocol / --reconnect-delay / --http2-origin 等）要么
+# 已在新版本中删除，要么有严格 flag 分层，容易因位置错误导致启动失败。
+# cloudflared tunnel run 的标准形式: cloudflared [global flags] tunnel run [run flags]
+CF_CMD="cloudflared --no-autoupdate tunnel run --token $ARGO_TOKEN"
+
+# cloudflared 守护循环：进程如果崩掉帮助日志里常见的 "flag not defined"、
+# token 过期、网络瞬断导致的退出 → 自动重启而不是让容器挂掉。
+# wait 返回后 sleep 2 秒再拉起，防止崩溃风暴。
+while true; do
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] cloudflared 启动..."
+  # 用 exec 让 cloudflared 直接替换当前 shell 进程（在子进程里跑循环），
+  # 方便 trap cleanup 正确处理信号；同时把 PID 打出来方便排查。
+  $CF_CMD &
+  CFPID=$!
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] cloudflared PID=$CFPID 已启动，等待退出..."
+  wait $CFPID
+  EXIT=$?
+  echo "[$(date '+%Y-%m-%d %H:%M:%S')] cloudflared 退出 code=$EXIT, 2 秒后重启..."
+  sleep 2
+done

@@ -454,43 +454,32 @@ for i in $(seq 1 30); do
 done
 
 # ========== 生成并注入订阅认证配置块 ==========
-#
-# 双轨认证：
-#   1) 路径前缀  /sub/<KEY>/subscribe.txt   ← 所有客户端通用（v2rayN、Clash、Surge 都能直接用）
-#   2) Query     /subscribe.txt?key=<KEY>  ← 兼容已有链接
-# 好处：不再依赖 X-Key header（Clash 等客户端订阅请求不支持自定义 header）。
-#
-# 同时处理 /sub/<KEY>/ 前缀 rewrite：HAProxy 在 deny 之前先做 rewrite，
-# 把带 key 的路径还原成原始路径转发到后端 8088，后端不用知道 key 这回事。
+# 仅支持路径前缀认证 /sub/<KEY>/...
+# 为什么不用 query string? HAProxy 没有 q() fetch method，
+# 用正则 req.hdr(url) 模拟 query 太脆弱且不同版本差异大。
+# 路径前缀方案：所有 HAProxy 版本都支持 path_beg + regsub，v2rayN/Clash/Surge 全部通用。
 
 AUTH_BLOCK=""
 if [ -n "$SUBSCRIBE_KEY" ]; then
-  # HAProxy 的 regsub 会把 . * [ ] ^ $ 等字符当成正则，先 escape KEY 里的这些字符
+  # HAProxy 的 regsub 会把 . * [ ] ^ $ + ? ( ) { } | 等当成正则，先 escape
   KEY_REGEX=$(echo "$SUBSCRIBE_KEY" | sed 's/[.[\*^$()+?{|]/\\&/g')
   AUTH_BLOCK=$(cat <<BLOCK_EOF
   # ===== 订阅认证已启用 =====
-  # 校验 /sub/<KEY>/ 路径前缀 与 ?key=<KEY> query（精确匹配 key 参数值）
+  # 只有 /sub/<KEY>/ 前缀是合法订阅路径
   acl sub_match_path path_beg /sub/$KEY_REGEX/
-  acl sub_match_query q(key) -i $KEY_REGEX
-
-  # 带路径前缀的请求：rewrite 去掉 /sub/<KEY>/ 后转发到后端 8088
+  # rewrite：把 /sub/<KEY>/xxx 还原成 /xxx 后转发到后端 8088
   http-request set-path %[path,regsub(^/sub/$KEY_REGEX/,/)] if sub_match_path
-
-  # deny：无正确 key 的订阅请求 → 401
-  #   - 原始路径 is_sub_raw 必须在 query 里带对 key
-  #   - /sub/ 前缀路径也必须匹配正确的 KEY
-  http-request deny deny_status 401 if is_sub_raw !sub_match_query
+  # deny：任何订阅相关路径如果不匹配 KEY → 401
+  http-request deny deny_status 401 if is_sub_raw
   http-request deny deny_status 401 if is_sub_path_prefix !sub_match_path
 BLOCK_EOF
 )
   echo ""
   echo "✓ 订阅认证已启用（SUBSCRIBE_KEY=$SUBSCRIBE_KEY）"
-  echo "  订阅 URL 形式1（路径前缀，所有客户端通用）:"
+  echo "  订阅 URL（路径前缀，所有客户端通用）:"
   echo "    /sub/${SUBSCRIBE_KEY}/subscribe.txt"
   echo "    /sub/${SUBSCRIBE_KEY}/clash.yaml"
   echo "    /sub/${SUBSCRIBE_KEY}/nodes.txt"
-  echo "  订阅 URL 形式2（query 兼容）:"
-  echo "    /subscribe.txt?key=${SUBSCRIBE_KEY}"
 else
   AUTH_BLOCK="  # ===== 订阅认证未启用（SUBSCRIBE_KEY 为空，订阅公开访问）====="
   echo "ℹ 订阅认证未启用（SUBSCRIBE_KEY 为空 → 订阅公开访问）"
@@ -515,8 +504,12 @@ echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081
 refresh_loop
 
 echo "Starting cloudflared..."
-# flag 分层：全局 flag 放最前，tunnel run 子命令的 flag 必须放在 run 之后
-# 错误顺序会导致 cloudflared 看不懂 → 打印帮助 → 直接退出 → Tunnel 永不连接！
-cloudflared --no-autoupdate tunnel run --protocol http2 --reconnect-delay 3s --token "$ARGO_TOKEN" &
+# cloudflared 的 flag 分层严格：
+#   - 顶层全局 flag 放最前：--no-autoupdate
+#   - `tunnel run` 子命令 flag 放 run 之后：--token / --http2-origin
+#   - ❌ 不存在 --protocol / --reconnect-delay（之前版本有，2025.8.1 已删）
+# 错误示例: cloudflared tunnel --no-autoupdate run --token ...   ❌ flag 位置错
+# 正确示例: cloudflared --no-autoupdate tunnel run --token ...   ✅
+cloudflared --no-autoupdate tunnel run --http2-origin --token "$ARGO_TOKEN" &
 CLOUDFLARED_PID=$!
 wait $CLOUDFLARED_PID

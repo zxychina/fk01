@@ -58,12 +58,15 @@ WARP_STREAM_OUTBOUND="${WARP_STREAM_OUTBOUND:-warp}"
 # 想只测某个地区？改 PREFERRED_DOMAIN_SOURCE 只留一个 URL 即可：
 #   PREFERRED_DOMAIN_SOURCE="https://bestcf.pages.dev/tiancheng/hk.txt"
 #   PREFERRED_DOMAIN_SOURCE="https://bestcf.pages.dev/tiancheng/jp.txt"
-#   PREFERRED_DOMAIN_SOURCE="https://bestcf.pages.dev/tiancheng2/hk.txt https://bestcf.pages.dev/tiancheng2/jp.txt"
 PREFERRED_DOMAIN_SOURCE="${PREFERRED_DOMAIN_SOURCE:-https://bestcf.pages.dev/domain/Domain-Asia.txt https://bestcf.pages.dev/tiancheng/hk.txt https://bestcf.pages.dev/tiancheng/jp.txt https://bestcf.pages.dev/domain/mini.txt}"
-# 最多预检域名数（太多会慢，4 个源汇总后可能有 80+，默认 60）
-MAX_TEST_COUNT="${MAX_TEST_COUNT:-60}"
-# 从预检通过的域名里取前几个作为订阅节点 + 当前节点（默认 7，多几个备选）
-PICK_COUNT="${PICK_COUNT:-7}"
+# 最多预检域名数（4 源汇总 ~117 个，预检 100 个能拿到 30+ 可用）
+MAX_TEST_COUNT="${MAX_TEST_COUNT:-100}"
+# 从预检通过的域名里取前几个作为订阅节点（默认 30 个，每个域名只生成 VLESS 1 条）
+PICK_COUNT="${PICK_COUNT:-30}"
+# 订阅里每个域名只生成哪种协议（vless | vmess | trojan | all）
+# 默认 vless — 每个域名只推 1 条 VLESS 订阅，清爽无重复
+# 改成 all → 每个域名都推 3 条（VLESS + VMess + Trojan），节点数 ×3
+SUB_PROTOCOL="${SUB_PROTOCOL:-vless}"
 
 # 订阅密钥（可为空，为空则不要求认证）
 # Railway 环境变量里如果用户不小心把注释 / 空格写进值的尾部，

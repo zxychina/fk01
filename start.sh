@@ -1,5 +1,8 @@
 #!/bin/sh
-set -e
+# 不再全局 set -e：测速/订阅生成过程中有较多"失败属正常"的命令（curl 超时、空结果），
+# set -e 会导致脚本在这些非致命错误时整体退出，订阅文件永远不生成。
+# 改用命令级 || true 兜底 + 关键校验 : "${VAR:?}" 严格中断。
+set -u
 
 # 优雅退出：收到 SIGTERM 时，先停所有子进程再退出
 cleanup() {
@@ -37,8 +40,21 @@ echo "=================================="
 REFRESH_INTERVAL="${REFRESH_INTERVAL:-6}"
 
 # 订阅密钥（可为空，为空则不要求认证）
-SUBSCRIBE_KEY="${SUBSCRIBE_KEY:-}"
+# Railway 环境变量里如果用户不小心把注释 / 空格写进值的尾部，
+# 这里自动清理：去掉前后空格、#号及其后所有内容。
+_raw_key="${SUBSCRIBE_KEY:-}"
+# 先截掉 # 号后的注释部分
+SUBSCRIBE_KEY="${_raw_key%%#*}"
+# 去前后空格（xargs 对纯空格的结果是空，正好）
+SUBSCRIBE_KEY=$(echo "$SUBSCRIBE_KEY" | xargs)
+unset _raw_key
 export SUBSCRIBE_KEY
+
+if [ -n "$SUBSCRIBE_KEY" ]; then
+  echo "✓ SUBSCRIBE_KEY 已设置（${#SUBSCRIBE_KEY} 字符，已自动清理空格和注释）"
+else
+  echo "ℹ SUBSCRIBE_KEY 未设置 → 订阅公开访问（建议设置防止泄露）"
+fi
 
 SUBSCRIBE_DIR="/app/subscribe"
 mkdir -p "$SUBSCRIBE_DIR"
@@ -275,12 +291,10 @@ refresh_loop() {
       sleep "$INTERVAL_SECONDS"
       echo ""
       echo "========== [定时任务] 开始刷新优选IP $(date '+%Y-%m-%d %H:%M:%S') =========="
-      set +e
-      # 重新测速并更新 /tmp/top_ips.txt
-      run_speedtest
+      # 重新测速并更新 /tmp/top_ips.txt（测速可能全失败，函数内部已有兜底）
+      run_speedtest || echo "[定时] 测速返回非零，继续尝试生成订阅..."
       # 重新生成订阅文件
-      generate_subscriptions
-      set -e
+      generate_subscriptions || echo "[定时] 生成订阅返回非零"
       echo "========== [定时任务] 刷新完成 $(date '+%Y-%m-%d %H:%M:%S') =========="
       echo ""
     done
@@ -430,26 +444,58 @@ for i in $(seq 1 30); do
 done
 
 # ========== 生成并注入订阅认证配置块 ==========
-# HAProxy 的 ACL 只在本 section 生效，因此认证判断必须写在 frontend 内；
-# 同时 HAProxy 不会自动展开环境变量，故在启动前把认证块注入到 haproxy.cfg 的占位符处。
+#
+# 双轨认证：
+#   1) 路径前缀  /sub/<KEY>/subscribe.txt   ← 所有客户端通用（v2rayN、Clash、Surge 都能直接用）
+#   2) Query     /subscribe.txt?key=<KEY>  ← 兼容已有链接
+# 好处：不再依赖 X-Key header（Clash 等客户端订阅请求不支持自定义 header）。
+#
+# 同时处理 /sub/<KEY>/ 前缀 rewrite：HAProxy 在 deny 之前先做 rewrite，
+# 把带 key 的路径还原成原始路径转发到后端 8088，后端不用知道 key 这回事。
+
+AUTH_BLOCK=""
 if [ -n "$SUBSCRIBE_KEY" ]; then
-  cat > /tmp/auth_block.txt <<EOF
-  # 订阅认证已启用：订阅路径需携带 X-Key 请求头（或 ?key= 由 Cloudflare 转发为头）
-  acl sub_key_match req.hdr(X-Key) -i $SUBSCRIBE_KEY
-  http-request deny deny_status 401 if is_sub !sub_key_match
-EOF
-  echo "订阅认证已启用（SUBSCRIBE_KEY 已设置）"
+  # HAProxy 的 regsub 会把 . * [ ] ^ $ 等字符当成正则，先 escape KEY 里的这些字符
+  KEY_REGEX=$(echo "$SUBSCRIBE_KEY" | sed 's/[.[\*^$()+?{|]/\\&/g')
+  AUTH_BLOCK=$(cat <<BLOCK_EOF
+  # ===== 订阅认证已启用 =====
+  # 校验 /sub/<KEY>/ 路径前缀 与 ?key=<KEY> query（精确匹配 key 参数值）
+  acl sub_match_path path_beg /sub/$KEY_REGEX/
+  acl sub_match_query q(key) -i $KEY_REGEX
+
+  # 带路径前缀的请求：rewrite 去掉 /sub/<KEY>/ 后转发到后端 8088
+  http-request set-path %[path,regsub(^/sub/$KEY_REGEX/,/)] if sub_match_path
+
+  # deny：无正确 key 的订阅请求 → 401
+  #   - 原始路径 is_sub_raw 必须在 query 里带对 key
+  #   - /sub/ 前缀路径也必须匹配正确的 KEY
+  http-request deny deny_status 401 if is_sub_raw !sub_match_query
+  http-request deny deny_status 401 if is_sub_path_prefix !sub_match_path
+BLOCK_EOF
+)
+  echo ""
+  echo "✓ 订阅认证已启用（SUBSCRIBE_KEY=$SUBSCRIBE_KEY）"
+  echo "  订阅 URL 形式1（路径前缀，所有客户端通用）:"
+  echo "    /sub/${SUBSCRIBE_KEY}/subscribe.txt"
+  echo "    /sub/${SUBSCRIBE_KEY}/clash.yaml"
+  echo "    /sub/${SUBSCRIBE_KEY}/nodes.txt"
+  echo "  订阅 URL 形式2（query 兼容）:"
+  echo "    /subscribe.txt?key=${SUBSCRIBE_KEY}"
 else
-  echo "  # 订阅认证未启用（未设置 SUBSCRIBE_KEY，订阅公开访问）" > /tmp/auth_block.txt
-  echo "订阅认证未启用（订阅公开访问）"
+  AUTH_BLOCK="  # ===== 订阅认证未启用（SUBSCRIBE_KEY 为空，订阅公开访问）====="
+  echo "ℹ 订阅认证未启用（SUBSCRIBE_KEY 为空 → 订阅公开访问）"
 fi
 
-# 将认证块插入占位符位置（读入文件后删除占位行）
-if grep -q '#__AUTH_BLOCK__' /app/haproxy.cfg 2>/dev/null; then
-  sed -i "/#__AUTH_BLOCK__/r /tmp/auth_block.txt" /app/haproxy.cfg
-  sed -i "/#__AUTH_BLOCK__/d" /app/haproxy.cfg
-  echo "已注入订阅认证配置到 haproxy.cfg"
+# 注入 haproxy.cfg（替换占位符 __AUTH_BLOCK__）
+# 我们用 sed /__AUTH_BLOCK__/r 把 AUTH_BLOCK 写入文件，再删掉占位行
+AUTH_FILE="/tmp/haproxy_auth_block.txt"
+printf '%s\n' "$AUTH_BLOCK" > "$AUTH_FILE"
+if grep -q '__AUTH_BLOCK__' /app/haproxy.cfg 2>/dev/null; then
+  sed -i "/__AUTH_BLOCK__/r $AUTH_FILE" /app/haproxy.cfg
+  sed -i "/__AUTH_BLOCK__/d" /app/haproxy.cfg
+  echo "✓ 已注入认证配置到 haproxy.cfg"
 fi
+rm -f "$AUTH_FILE"
 
 echo "Starting HAProxy..."
 haproxy -f /app/haproxy.cfg

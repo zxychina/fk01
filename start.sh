@@ -515,6 +515,8 @@ echo "HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081
 refresh_loop
 
 echo "Starting cloudflared..."
-cloudflared tunnel --no-autoupdate --protocol http2 --reconnect-delay 3s run --token "$ARGO_TOKEN" &
+# flag 分层：全局 flag 放最前，tunnel run 子命令的 flag 必须放在 run 之后
+# 错误顺序会导致 cloudflared 看不懂 → 打印帮助 → 直接退出 → Tunnel 永不连接！
+cloudflared --no-autoupdate tunnel run --protocol http2 --reconnect-delay 3s --token "$ARGO_TOKEN" &
 CLOUDFLARED_PID=$!
 wait $CLOUDFLARED_PID

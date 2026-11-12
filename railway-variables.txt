@@ -1,0 +1,30 @@
+# ============================================================
+# Railway 环境变量 —— 直接复制粘贴到 Railway → Variables → Raw Editor
+# ============================================================
+# 说明:
+#   # 开头的是注释，Railway Raw Editor 会忽略
+#   等号两边不能有空格
+#   注释不要写在值尾部（SUBSCRIBE_KEY=xxx # 注释 会被脚本自动清理，但建议只写值）
+# ============================================================
+
+# ---------- 🔴 必填（没设启动直接报错） ----------
+UUID=3f8103ab-151d-4861-9608-909ecf98cf0b
+TROJAN_PASSWORD=zxy1474147
+ARGO_TOKEN=eyJhIjoiODI4N2M0OTc2YThhZjNlZDllYjBkMzg4ZDY4ZTMxZWYiLCJ0IjoiNWI2NzI3NWQtOThmOS00MDQ3LWIzN2YtMGZmNmFjZjgzNzI2IiwicyI6Ik9XVm1PRFJsTURrdE9XWXpZeTAwWmpObUxUa3dNV0l0WmpKbE56TTFPR0V4TXpReCJ9
+VLESS_DOMAIN=fk01.fqzy.indevs.in
+VMESS_DOMAIN=fk01.fqzy.indevs.in
+TROJAN_DOMAIN=fk01.fqzy.indevs.in
+
+# ---------- 🟡 建议设置（有默认值，但显式写出来更好） ----------
+SUBSCRIBE_KEY=my-secret-key
+SUB_PROTOCOL=vless
+PREFERRED_DOMAIN_SOURCE=https://bestcf.pages.dev/domain/Domain-Asia.txt https://bestcf.pages.dev/tiancheng/hk.txt https://bestcf.pages.dev/tiancheng/jp.txt https://bestcf.pages.dev/domain/mini.txt
+MAX_TEST_COUNT=100
+PICK_COUNT=30
+REFRESH_INTERVAL=6
+
+# ---------- 🟢 不用设（默认值已经完美） ----------
+# AUTO_PREFERRED_IP=true      # 自动优选开关，默认 true
+# PREFERRED_ADDR=             # 手动锁定域名，留空=自动
+# ENABLE_WARP=false           # 解锁流媒体，默认 false
+# WARP_PRIVATE_KEY=           # 开 WARP 才需要

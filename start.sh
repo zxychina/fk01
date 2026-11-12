@@ -54,6 +54,8 @@ WARP_STREAM_OUTBOUND="${WARP_STREAM_OUTBOUND:-warp}"
 PREFERRED_DOMAIN_SOURCE="${PREFERRED_DOMAIN_SOURCE:-https://bestcf.pages.dev/domain/mini.txt}"
 # 最多测速域名数（太多会慢，默认 40）
 MAX_TEST_COUNT="${MAX_TEST_COUNT:-40}"
+# 从预检通过的域名里取前几个作为订阅节点 + 当前节点（默认 5）
+PICK_COUNT="${PICK_COUNT:-5}"
 
 # 订阅密钥（可为空，为空则不要求认证）
 # Railway 环境变量里如果用户不小心把注释 / 空格写进值的尾部，
@@ -156,6 +158,16 @@ fetch_domain_list() {
 }
 
 # ========== 测速优选函数 ==========
+# 策略：bestcf.pages.dev 本身就是社区优选好的 Top 列表（每半小时更新），
+# Railway 容器在 Cloudflare 内网，curl Cloudflare 域名全是 ~0ms，
+# 二次延迟测速没有意义，所以这里改成：
+#   1. 从 bestcf 拉最新列表
+#   2. 做快速连通性预检（curl --connect-timeout 2 --max-time 3，能通就行）
+#   3. 取预检通过的前 K 个（默认 5），作为订阅节点 + 当前 PREFERRED_ADDR
+#   4. bestcf 拉不到 → fallback 本地硬编码 + 同样的预检逻辑
+#
+# 为什么要预检？bestcf 也会失效一些域名，预检能过滤掉不能连的。
+# 为什么不测延迟？内网对 CF 域名全是 0ms，测了白测。
 run_speedtest() {
   if [ "${AUTO_PREFERRED_IP:-true}" != "true" ] || [ -n "${PREFERRED_ADDR:-}" ]; then
     # 手动指定了 PREFERRED_ADDR 或关闭了自动优选，跳过测速
@@ -167,6 +179,9 @@ run_speedtest() {
 
   echo "========== 自动检测优选IP =========="
 
+  PICK_COUNT="${PICK_COUNT:-5}"  # 从预检通过的域名里取前几个作为节点
+  echo "目标: 从最新优选列表里预检连通性，取前 $PICK_COUNT 个可用的..."
+
   # 优先级：环境变量 PREFERRED_IP_LIST > 远程拉取 bestcf > 本地硬编码
   if [ -n "${PREFERRED_IP_LIST:-}" ]; then
     echo "ℹ 使用自定义 PREFERRED_IP_LIST（跳过远程拉取）"
@@ -176,59 +191,72 @@ run_speedtest() {
     IP_LIST=$(fetch_domain_list)
   fi
 
+  # 过滤空行、去重、取前 MAX_TEST_COUNT 个
+  IP_LIST=$(echo "$IP_LIST" | grep -v '^[[:space:]]*$' | sort -u | head -"${MAX_TEST_COUNT:-40}")
   TOTAL=$(echo "$IP_LIST" | grep -c .)
-  echo "正在测试 $TOTAL 个地址（并行测速，测量 TLS 真实连接延迟）..."
+  echo "候选地址总数: $TOTAL"
 
-  # 并行测速：每个地址后台执行，测量 TLS 握手完成时间 (time_appconnect)
+  if [ "$TOTAL" -eq 0 ]; then
+    echo "✗ 候选列表为空，使用默认域名"
+    VLESS_ADDR="$VLESS_DOMAIN"
+    VMESS_ADDR="$VMESS_DOMAIN"
+    TROJAN_ADDR="$TROJAN_DOMAIN"
+    echo "============================="
+    return 0
+  fi
+
+  # 并行预检连通性（只看能不能通，不测延迟）
+  # 能通就在 $TEST_DIR/<ip> 里写个 "ok"，不通就跳过
   TEST_DIR="/tmp/speedtest"
   rm -rf "$TEST_DIR"
   mkdir -p "$TEST_DIR"
 
   for IP in $IP_LIST; do
     (
-      TIME=$(curl -o /dev/null -s -w '%{time_appconnect}' \
-        --connect-timeout 3 --max-time 5 \
-        -k "https://$IP" 2>/dev/null || echo "9999")
-      if [ "$TIME" != "000000.000000" ] && [ -n "$TIME" ]; then
-        echo "$TIME" > "$TEST_DIR/$IP"
-      fi
+      # 只取 host 部分（万一还有端口混进来）
+      HOST="${IP%%:*}"
+      [ -z "$HOST" ] && exit 0
+      curl -o /dev/null -s --connect-timeout 2 --max-time 3 \
+        -k "https://$HOST" 2>/dev/null && echo "ok" > "$TEST_DIR/$HOST"
     ) &
   done
-
   wait
 
-  # 汇总结果：地址|延迟
-  RESULTS=""
+  # 收集预检通过的地址（保留原顺序，取前 PICK_COUNT 个）
+  PASSED=""
+  PASSED_COUNT=0
   for IP in $IP_LIST; do
-    if [ -f "$TEST_DIR/$IP" ]; then
-      TIME=$(cat "$TEST_DIR/$IP")
-      if [ "$TIME" != "9999" ]; then
-        RESULTS="$RESULTS$IP|$TIME"$'\n'
-      fi
+    HOST="${IP%%:*}"
+    if [ -f "$TEST_DIR/$HOST" ]; then
+      PASSED="$PASSED${HOST}"$'\n'
+      PASSED_COUNT=$((PASSED_COUNT + 1))
+      [ "$PASSED_COUNT" -ge "$PICK_COUNT" ] && break
     fi
   done
   rm -rf "$TEST_DIR"
 
-  # 按延迟排序并取前5
-  BEST_LIST=$(echo "$RESULTS" | sort -t'|' -k2 -n | head -5)
+  # 去掉尾空行
+  PASSED=$(echo "$PASSED" | grep -v '^[[:space:]]*$')
 
-  COUNT=$(echo "$BEST_LIST" | grep -c '|' || true)
-  if [ "$COUNT" -gt 0 ]; then
+  if [ "$PASSED_COUNT" -gt 0 ]; then
     echo ""
-    echo "延迟最低的前 $COUNT 个地址:"
-    echo "$BEST_LIST" | awk -F'|' '{printf "  %s - %.4fs\n", $1, $2}'
+    echo "✓ 预检通过 $PASSED_COUNT / $TOTAL 个地址:"
+    echo "$PASSED" | awk '{printf "  %s\n", $1}'
     echo ""
 
-    # 保存前5个IP到临时文件（仅IP，不带延迟）
-    echo "$BEST_LIST" | cut -d'|' -f1 > /tmp/top_ips.txt
+    # 保存到 /tmp/top_ips.txt（去尾空行，避免 wc -l 多算）
+    echo "$PASSED" | grep -v '^[[:space:]]*$' > /tmp/top_ips.txt
 
-    # 从 top 列表中随机选一个
-    PICK_INDEX=$(( (RANDOM % COUNT) + 1 ))
-    PREFERRED_ADDR=$(echo "$BEST_LIST" | sed -n "${PICK_INDEX}p" | cut -d'|' -f1)
-    PICK_TIME=$(echo "$BEST_LIST" | sed -n "${PICK_INDEX}p" | cut -d'|' -f2)
-    echo "✓ 随机选中: $PREFERRED_ADDR (延迟: ${PICK_TIME}s, 共 $COUNT 个候选)"
+    # 从预检通过的列表里随机选一个作为当前 PREFERRED_ADDR
+    # （订阅里仍然是全部 $PASSED_COUNT 个，客户端自己挑）
+    PICK_INDEX=$(( (RANDOM % PASSED_COUNT) + 1 ))
+    PREFERRED_ADDR=$(echo "$PASSED" | sed -n "${PICK_INDEX}p")
+    echo "✓ 当前节点随机选: $PREFERRED_ADDR (候选共 $PASSED_COUNT 个)"
   else
-    echo "✗ 未检测到可用优选IP，使用默认域名"
+    echo "⚠ 预检全挂（可能容器出网有问题），直接用第一个候选"
+    FIRST=$(echo "$IP_LIST" | grep -v '^[[:space:]]*$' | head -1 | sed 's/:.*//')
+    echo "$FIRST" > /tmp/top_ips.txt
+    PREFERRED_ADDR="$FIRST"
   fi
   echo "============================="
 

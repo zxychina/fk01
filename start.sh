@@ -49,6 +49,12 @@ WARP_PUBLIC_KEY="${WARP_PUBLIC_KEY:-}"
 WARP_ENDPOINT="${WARP_ENDPOINT:-}"
 WARP_STREAM_OUTBOUND="${WARP_STREAM_OUTBOUND:-warp}"
 
+# 动态优选域名来源（支持空格分隔多 URL，第一个有内容就用）
+# 默认从 bestcf.pages.dev 迷你版拉取，可改为 "https://bestcf.pages.dev/domain/Domain-Asia.txt" 等
+PREFERRED_DOMAIN_SOURCE="${PREFERRED_DOMAIN_SOURCE:-https://bestcf.pages.dev/domain/mini.txt}"
+# 最多测速域名数（太多会慢，默认 40）
+MAX_TEST_COUNT="${MAX_TEST_COUNT:-40}"
+
 # 订阅密钥（可为空，为空则不要求认证）
 # Railway 环境变量里如果用户不小心把注释 / 空格写进值的尾部，
 # 这里自动清理：去掉前后空格、#号及其后所有内容。
@@ -69,6 +75,86 @@ fi
 SUBSCRIBE_DIR="/app/subscribe"
 mkdir -p "$SUBSCRIBE_DIR"
 
+# ========== 动态拉取优选域名列表 ==========
+# 从 bestcf.pages.dev 拉取最新优选域名，支持环境变量自定义来源
+# 格式：host:port#备注 （每行一个）
+# 拉取失败或为空 → fallback 本地硬编码列表
+fetch_domain_list() {
+  # 可自定义来源（URL），默认从 bestcf.pages.dev 拉
+  SOURCES="${PREFERRED_DOMAIN_SOURCE:-https://bestcf.pages.dev/domain/mini.txt}"
+
+  REMOTE_LIST=""
+  for src in $SOURCES; do
+    echo "  拉取优选域名源: $src"
+    tmp=$(curl -sS --connect-timeout 5 --max-time 10 "$src" 2>/dev/null) || true
+    if [ -n "$tmp" ]; then
+      REMOTE_LIST="$REMOTE_LIST"$'\n'"$tmp"
+    fi
+  done
+
+  if [ -n "$REMOTE_LIST" ]; then
+    # 解析 "host:port#备注" 格式，提取 host 部分：
+    #   1. 每行取 # 前的部分（去备注）
+    #   2. 再取 : 前的部分（去端口）
+    #   3. 去空行、去重、排序
+    CLEAN=$(echo "$REMOTE_LIST" \
+      | sed 's/#.*//' \
+      | sed 's/:.*//' \
+      | sed '/^$/d' \
+      | sort -u)
+
+    COUNT=$(echo "$CLEAN" | wc -l)
+    echo "  ✓ 远程拉取成功: $COUNT 个唯一地址"
+
+    # 限制最多取 MAX_TEST_COUNT（默认 40）个，避免测速太久
+    MAX_TEST_COUNT="${MAX_TEST_COUNT:-40}"
+    if [ "$COUNT" -gt "$MAX_TEST_COUNT" ]; then
+      CLEAN=$(echo "$CLEAN" | head -"$MAX_TEST_COUNT")
+      echo "  ℹ 过多，截断为前 $MAX_TEST_COUNT 个（$COUNT 总数）"
+    fi
+
+    echo "$CLEAN"
+    return 0
+  fi
+
+  # === fallback: 本地硬编码列表 ===
+  echo "  ✗ 远程拉取失败，使用本地备用列表" >&2
+  echo "cf.tencentapp.cn"
+  echo "cloudflare.182682.xyz"
+  echo "cm.cloudflare.byoip.top"
+  echo "cmcc.877774.xyz"
+  echo "ct.877774.xyz"
+  echo "ct.cloudflare.byoip.top"
+  echo "cu.877774.xyz"
+  echo "cu.cloudflare.byoip.top"
+  echo "r2.dev"
+  echo "static.cloudflareinsights.com"
+  echo "cf.877774.xyz"
+  echo "www.shopify.com"
+  echo "www.asda.com"
+  echo "www.emerson.com"
+  echo "markmonitor.com"
+  echo "openai.com"
+  echo "www.sage.com"
+  echo "investor.apple.com"
+  echo "www.speedtest.net"
+  echo "www.affirm.com"
+  echo "digitalocean.com"
+  echo "chrono24.com"
+  echo "cdn.jsdelivr.net"
+  echo "www.broadcom.com"
+  echo "www.nestle.com"
+  echo "visit.honeywell.com"
+  echo "polestar.com"
+  echo "deepin.org"
+  echo "engage.cloudflareclient.com"
+  echo "cloudflare.dev"
+  echo "pages.dev"
+  echo "cdnjs.com"
+  echo "cloudflare-ech.com"
+  return 1
+}
+
 # ========== 测速优选函数 ==========
 run_speedtest() {
   if [ "${AUTO_PREFERRED_IP:-true}" != "true" ] || [ -n "${PREFERRED_ADDR:-}" ]; then
@@ -81,11 +167,16 @@ run_speedtest() {
 
   echo "========== 自动检测优选IP =========="
 
-  # 可自定义列表（空格分隔），默认优选15个低延迟 Cloudflare 域名
-  # 按 TLS 握手延迟排序，全部使用域名避免 IP 被封
-  IP_LIST="${PREFERRED_IP_LIST:-cf.tencentapp.cn cloudflare.182682.xyz cm.cloudflare.byoip.top cmcc.877774.xyz ct.877774.xyz ct.cloudflare.byoip.top cu.877774.xyz cu.cloudflare.byoip.top r2.dev static.cloudflareinsights.com cf.877774.xyz www.shopify.com www.asda.com www.emerson.com markmonitor.com}"
+  # 优先级：环境变量 PREFERRED_IP_LIST > 远程拉取 bestcf > 本地硬编码
+  if [ -n "${PREFERRED_IP_LIST:-}" ]; then
+    echo "ℹ 使用自定义 PREFERRED_IP_LIST（跳过远程拉取）"
+    IP_LIST="$PREFERRED_IP_LIST"
+  else
+    echo "正在从 bestcf.pages.dev 拉取最新优选域名列表..."
+    IP_LIST=$(fetch_domain_list)
+  fi
 
-  TOTAL=$(echo "$IP_LIST" | wc -w)
+  TOTAL=$(echo "$IP_LIST" | grep -c .)
   echo "正在测试 $TOTAL 个地址（并行测速，测量 TLS 真实连接延迟）..."
 
   # 并行测速：每个地址后台执行，测量 TLS 握手完成时间 (time_appconnect)

@@ -1,0 +1,169 @@
+2026-11-12T10:26:30.558012319Z [inf]    ✓ ARGO_TOKEN (已设置, 长度: 185)
+2026-11-12T10:26:30.558018989Z [inf]    ✓ VLESS_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:26:30.558059139Z [inf]  ========== start.sh 已执行 ==========
+2026-11-12T10:26:30.558105289Z [inf]  ========== 环境变量检查 ==========
+2026-11-12T10:26:30.558109159Z [inf]    ✓ TROJAN_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:26:30.558114909Z [inf]  ==================================
+2026-11-12T10:26:30.558123628Z [inf]  ✓ SUBSCRIBE_KEY 已设置（13 字符，已自动清理空格和注释）
+2026-11-12T10:26:30.558128198Z [inf]  ========== 自动检测优选IP ==========
+2026-11-12T10:26:30.558134288Z [inf]  正在测试 15 个地址（并行测速，测量 TLS 真实连接延迟）...
+2026-11-12T10:26:30.558203808Z [inf]    ✓ UUID (已设置, 长度: 36)
+2026-11-12T10:26:30.558213018Z [inf]    ✓ TROJAN_PASSWORD (已设置, 长度: 10)
+2026-11-12T10:26:30.559044861Z [inf]    ✓ VMESS_DOMAIN (已设置, 长度: 19)
+2026-11-12T10:26:30.612814338Z [inf]  Starting Container
+2026-11-12T10:26:35.238208313Z [inf]  SUBSCRIBE_KEY: my-secret-key
+2026-11-12T10:26:35.238216083Z [inf]  ===============================
+2026-11-12T10:26:35.238219873Z [inf]  
+2026-11-12T10:26:35.238227532Z [inf]  ARGO_TOKEN: 185 字符
+2026-11-12T10:26:35.238228872Z [inf]  TROJAN_PASSWORD: 10 字符
+2026-11-12T10:26:35.238237782Z [inf]  VMESS_ADDR: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238237902Z [inf]  ENABLE_WARP: false
+2026-11-12T10:26:35.238238422Z [inf]  延迟最低的前 4 个地址:
+2026-11-12T10:26:35.238243802Z [inf]  UUID exists
+2026-11-12T10:26:35.238246322Z [inf]  TROJAN_ADDR: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238250292Z [inf]     - 0.0000s
+2026-11-12T10:26:35.238250802Z [inf]  PREFERRED_ADDR: 未设置，使用各自域名
+2026-11-12T10:26:35.238261312Z [inf]  TROJAN_PASSWORD exists
+2026-11-12T10:26:35.238261802Z [inf]    cf.tencentapp.cn - 0.0000s
+2026-11-12T10:26:35.238264302Z [inf]  VLESS_ADDR: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238264662Z [inf]  =============================
+2026-11-12T10:26:35.238269372Z [inf]  ARGO_TOKEN length: 185
+2026-11-12T10:26:35.238271072Z [inf]    cloudflare.182682.xyz - 0.0000s
+2026-11-12T10:26:35.238274302Z [inf]  VLESS_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238276622Z [inf]    cm.cloudflare.byoip.top - 0.0000s
+2026-11-12T10:26:35.238278272Z [inf]  VMESS_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238282362Z [inf]    cmcc.877774.xyz - 0.0000s
+2026-11-12T10:26:35.238283042Z [inf]  TROJAN_DOMAIN: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.238289672Z [inf]  
+2026-11-12T10:26:35.238294712Z [inf]  ✓ 随机选中:  (延迟: s, 共 4 个候选)
+2026-11-12T10:26:35.238301012Z [inf]  =============================
+2026-11-12T10:26:35.238307402Z [inf]  ========== 参数检查 ==========
+2026-11-12T10:26:35.238310542Z [inf]  ========== 配置摘要 ==========
+2026-11-12T10:26:35.238323072Z [inf]  UUID: 36 字符
+2026-11-12T10:26:35.540973402Z [inf]  ========== 节点链接 ==========
+2026-11-12T10:26:35.540976642Z [inf]  Trojan:
+2026-11-12T10:26:35.540982732Z [inf]  trojan://zxy1474147@fk01.fqzy.indevs.in:443?security=tls&sni=fk01.fqzy.indevs.in&insecure=0&allowInsecure=0&type=ws&host=fk01.fqzy.indevs.in&path=%2Ftrojan#Railway-Trojan
+2026-11-12T10:26:35.540987132Z [inf]  VLESS:
+2026-11-12T10:26:35.540995992Z [inf]  vless://3f8103ab-151d-4861-9608-909ecf98cf0b@fk01.fqzy.indevs.in:443?encryption=none&security=tls&sni=fk01.fqzy.indevs.in&insecure=0&allowInsecure=0&type=ws&host=fk01.fqzy.indevs.in&path=%2Fvless#Railway-VLESS
+2026-11-12T10:26:35.540996422Z [inf]  端口: 443
+2026-11-12T10:26:35.541006102Z [inf]  UUID: 3f8103ab-151d-4861-9608-909ecf98cf0b
+2026-11-12T10:26:35.541008572Z [inf]  
+2026-11-12T10:26:35.541012452Z [inf]  alterId: 0
+2026-11-12T10:26:35.541022642Z [inf]  Host: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.541029102Z [inf]  SNI: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.541034031Z [inf]  
+2026-11-12T10:26:35.541038471Z [inf]  VMess URI (可直接导入客户端):
+2026-11-12T10:26:35.541043911Z [inf]  vmess://eyJ2IjoiMiIsInBzIjoiUmFpbHdheS1WTWVzcyIsImFkZCI6ImZrMDEuZnF6eS5pbmRldnMuaW4iLCJwb3J0IjoiNDQzIiwiaWQiOiIzZjgxMDNhYi0xNTFkLTQ4NjEtOTYwOC05MDllY2Y5OGNmMGIiLCJhaWQiOiIwIiwic2N5IjoiYXV0byIsIm5ldCI6IndzIiwidHlwZSI6Im5vbmUiLCJob3N0IjoiZmswMS5mcXp5LmluZGV2cy5pbiIsInBhdGgiOiIvdm1lc3MiLCJ0bHMiOiJ0bHMiLCJzbmkiOiJmazAxLmZxenkuaW5kZXZzLmluIiwiYWxwbiI6IiJ9
+2026-11-12T10:26:35.541046651Z [inf]  
+2026-11-12T10:26:35.541048001Z [inf]  ==============================
+2026-11-12T10:26:35.541052591Z [inf]  ========== 生成订阅文件 ==========
+2026-11-12T10:26:35.541063991Z [inf]  VMess 参数:
+2026-11-12T10:26:35.541070451Z [inf]  地址: fk01.fqzy.indevs.in
+2026-11-12T10:26:35.541079391Z [inf]  传输: ws
+2026-11-12T10:26:35.541092411Z [inf]  路径: /vmess
+2026-11-12T10:26:35.541100371Z [inf]  TLS: tls
+2026-11-12T10:26:35.544372844Z [inf]  使用 5 个优选地址生成多节点订阅...
+2026-11-12T10:26:35.544381544Z [inf]  已生成 12 个节点（4个地址 × 3种协议）
+2026-11-12T10:26:35.544387324Z [inf]  ✦ 标准订阅: http://localhost:8088/subscribe.txt
+2026-11-12T10:26:35.544392834Z [inf]  ✦ Clash订阅: http://localhost:8088/clash.yaml
+2026-11-12T10:26:35.544398614Z [inf]  ✦ 节点URI:   http://localhost:8088/nodes.txt
+2026-11-12T10:26:35.544403913Z [inf]  订阅文件已生成到 /app/subscribe
+2026-11-12T10:26:35.544408913Z [inf]  ==============================
+2026-11-12T10:26:35.544413953Z [inf]  
+2026-11-12T10:26:35.544419063Z [inf]  📌 公开订阅链接使用方法:
+2026-11-12T10:26:35.544424093Z [inf]     在 Cloudflare Tunnel 仪表盘中添加一个 Public Hostname:
+2026-11-12T10:26:35.544428673Z [inf]       服务指向 → localhost:7080
+2026-11-12T10:26:35.544438793Z [inf]     HAProxy 会自动按路径分发:
+2026-11-12T10:26:35.544443783Z [inf]       /vless        → sing-box VLESS (8080)
+2026-11-12T10:26:35.544448753Z [inf]       /vmess        → sing-box VMess (8081)
+2026-11-12T10:26:35.544453743Z [inf]       /trojan       → sing-box Trojan (8082)
+2026-11-12T10:26:35.544458933Z [inf]       其他路径       → 订阅服务 (8088)
+2026-11-12T10:26:35.544463483Z [inf]     然后节点地址为:
+2026-11-12T10:26:35.544468183Z [inf]       https://你的域名 (VLESS / VMess / Trojan 共用)
+2026-11-12T10:26:35.544472983Z [inf]     订阅地址为:
+2026-11-12T10:26:35.544477663Z [inf]       https://你的域名/subscribe.txt
+2026-11-12T10:26:35.544482543Z [inf]       https://你的域名/clash.yaml
+2026-11-12T10:26:35.544487403Z [inf]  
+2026-11-12T10:26:35.544492383Z [inf]  Starting subscription HTTP server on :8088...
+2026-11-12T10:26:36.644269240Z [inf]  Subscription HTTP server started (PID: 129).
+2026-11-12T10:26:36.644273760Z [inf]  Starting sing-box...
+2026-11-12T10:26:36.644278450Z [inf]  等待 sing-box 就绪...
+2026-11-12T10:26:36.644283080Z [err]  [36mINFO[0m[0000] router: updated default interface railnet0, index 3
+2026-11-12T10:26:36.644287870Z [err]  [36mINFO[0m[0000] inbound/vless[vless-in]: tcp server started at [::]:8080
+2026-11-12T10:26:36.644292320Z [err]  [36mINFO[0m[0000] inbound/vmess[vmess-in]: tcp server started at [::]:8081
+2026-11-12T10:26:36.644296420Z [err]  [36mINFO[0m[0000] inbound/trojan[trojan-in]: tcp server started at [::]:8082
+2026-11-12T10:26:36.644300700Z [err]  [36mINFO[0m[0000] sing-box started (0.00s)
+2026-11-12T10:26:37.556446646Z [inf]      /sub/my-secret-key/subscribe.txt
+2026-11-12T10:26:37.556457756Z [inf]      /sub/my-secret-key/clash.yaml
+2026-11-12T10:26:37.556463116Z [inf]      /sub/my-secret-key/nodes.txt
+2026-11-12T10:26:37.556467016Z [inf]  ✓ 已注入认证配置到 haproxy.cfg
+2026-11-12T10:26:37.556472056Z [inf]  Starting HAProxy...
+2026-11-12T10:26:37.556478036Z [err]  [NOTICE]   (157) : Automatically setting global.maxconn to 524219.
+2026-11-12T10:26:37.556482326Z [err]  [NOTICE]   (157) : haproxy version is 3.4.7-8872a26
+2026-11-12T10:26:37.556486826Z [err]  [WARNING]  (157) : [haproxy.main()] HAProxy was started as root without any 'chroot' directive. A chroot limits filesystem access of an intruder to a single, preferably empty, directory. It is strongly recommended to enable this feature whenever possible (it's always possible when starting as root), via 'chroot auto' in the global section. If you think you have good reasons for running outside a chroot, explicitly configure 'chroot /' to silence this warning.
+2026-11-12T10:26:37.556491606Z [err]  [WARNING]  (157) : [haproxy.main()] HAProxy was started as the root user and does not make use of 'user' nor 'uid' global options to drop the privileges. This is generally considered as a bad practice security-wise. If running as root is intentional, please make it explicit using 'uid 0' or 'user root', and also please consider using the 'chroot' directive to isolate the process into a totally empty and read-only directory if possible. Also, since your operating system supports it, always prefer relying on capabilities with unprivileged users than running with full privileges (look for 'setcap' in the configurationmanual).
+2026-11-12T10:26:37.556518265Z [inf]  sing-box 已就绪（等待 2s）。
+2026-11-12T10:26:37.556520905Z [inf]  
+2026-11-12T10:26:37.556524535Z [inf]  ✓ 订阅认证已启用（SUBSCRIBE_KEY=my-secret-key）
+2026-11-12T10:26:37.556527735Z [inf]    订阅 URL（路径前缀，所有客户端通用）:
+2026-11-12T10:26:37.557780914Z [inf]  HAProxy started on :7080, distributing paths: /vless→8080, /vmess→8081, /trojan→8082, 其他→8088
+2026-11-12T10:26:37.557792474Z [inf]  ========== 启动定时优选任务 ==========
+2026-11-12T10:26:37.557796374Z [inf]  每 6 小时自动刷新优选IP并更新订阅文件
+2026-11-12T10:26:37.557799824Z [inf]  ======================================
+2026-11-12T10:26:37.557803314Z [inf]  定时优选任务已启动 (PID: 189)
+2026-11-12T10:26:37.557807334Z [inf]  Starting cloudflared...
+2026-11-12T10:26:37.557811724Z [inf]  [2026-11-12 10:26:37] cloudflared 启动...
+2026-11-12T10:26:37.557816034Z [inf]  [2026-11-12 10:26:37] cloudflared PID=192 已启动，等待退出...
+2026-11-12T10:26:37.557819514Z [err]  2026-11-12T10:26:37Z INF Starting tunnel tunnelID=5b67275d-98f9-4047-b37f-0ff6acf83726
+2026-11-12T10:26:37.557823084Z [err]  2026-11-12T10:26:37Z INF Version 2025.8.1 (Checksum a66353004197ee4c1fcb68549203824882bba62378ad4d00d234bdb8251f1114)
+2026-11-12T10:26:37.557827014Z [err]  2026-11-12T10:26:37Z INF GOOS: linux, GOVersion: go1.24.4, GoArch: amd64
+2026-11-12T10:26:37.557831924Z [err]  2026-11-12T10:26:37Z INF Settings: map[no-autoupdate:true token:*****]
+2026-11-12T10:26:37.557835334Z [err]  2026-11-12T10:26:37Z INF Generated Connector ID: c1bd96fc-a333-4a89-9012-5c477c25cd37
+2026-11-12T10:26:37.557839004Z [err]  2026-11-12T10:26:37Z INF Initial protocol quic
+2026-11-12T10:26:37.557842354Z [err]  2026-11-12T10:26:37Z INF ICMP proxy will use 10.228.151.38 as source for IPv4
+2026-11-12T10:26:37.557846074Z [err]  2026-11-12T10:26:37Z INF ICMP proxy will use fd12:7b18:aa95:1:d000:1ae:ee4:9726 in zone railnet0 as source for IPv6
+2026-11-12T10:26:37.557849444Z [err]  2026-11-12T10:26:37Z ERR Cannot determine default origin certificate path. No file cert.pem in [~/.cloudflared ~/.cloudflare-warp ~/cloudflare-warp /etc/cloudflared /usr/local/etc/cloudflared]. You need to specify the origin certificate path by specifying the origincert option in the configuration file, or set TUNNEL_ORIGIN_CERT environment variable originCertPath=
+2026-11-12T10:26:37.558886656Z [err]  2026-11-12T10:26:37Z INF ICMP proxy will use 10.228.151.38 as source for IPv4
+2026-11-12T10:26:37.558892495Z [err]  2026-11-12T10:26:37Z INF ICMP proxy will use fd12:7b18:aa95:1:d000:1ae:ee4:9726 in zone railnet0 as source for IPv6
+2026-11-12T10:26:37.558897695Z [err]  2026-11-12T10:26:37Z INF Starting metrics server on 127.0.0.1:20241/metrics
+2026-11-12T10:26:37.558901585Z [err]  2026-11-12T10:26:37Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=0 event=0 ip=198.41.192.107
+2026-11-12T10:26:37.596948023Z [err]  2026-11-12T10:26:37Z INF Registered tunnel connection connIndex=0 connection=766edab5-3080-4bd5-8b4a-5c3142c13f46 event=0 ip=198.41.192.107 location=sjc06 protocol=quic
+2026-11-12T10:26:37.596956663Z [err]  2026-11-12T10:26:37Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=1 event=0 ip=198.41.200.73
+2026-11-12T10:26:37.600324634Z [err]  2026-11-12T10:26:37Z INF Updated to new configuration config="{\"ingress\":[{\"hostname\":\"fk01.fqzy.indevs.in\", \"originRequest\":{}, \"service\":\"http://localhost:7080\"}, {\"service\":\"http_status:404\"}], \"warp-routing\":{\"enabled\":false}}" version=2
+2026-11-12T10:26:37.804406385Z [err]  2026-11-12T10:26:37Z INF Registered tunnel connection connIndex=1 connection=f07a48a3-4a7b-4b58-a74d-3bd2cfd92356 event=0 ip=198.41.200.73 location=sjc10 protocol=quic
+2026-11-12T10:26:38.605547027Z [err]  2026-11-12T10:26:38Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=2 event=0 ip=198.41.192.47
+2026-11-12T10:26:38.723564197Z [err]  2026-11-12T10:26:38Z INF Registered tunnel connection connIndex=2 connection=44c212b2-9b68-44a1-9008-4d31ec4778a6 event=0 ip=198.41.192.47 location=sjc01 protocol=quic
+2026-11-12T10:26:39.734705218Z [err]  2026-11-12T10:26:39Z INF Tunnel connection curve preferences: [X25519MLKEM768 CurveP256] connIndex=3 event=0 ip=198.41.200.33
+2026-11-12T10:26:39.752117690Z [err]  2026-11-12T10:26:39Z INF Registered tunnel connection connIndex=3 connection=5340c75a-3f97-44e8-a740-81fad8eaeb72 event=0 ip=198.41.200.33 location=sjc10 protocol=quic
+2026-11-12T10:27:09.754260752Z [err]  127.0.0.1 - - [12/Nov/2026 10:27:01] "GET /subscribe.txt HTTP/1.1" 200 -
+2026-11-12T10:27:09.869237430Z [err]  127.0.0.1 - - [12/Nov/2026 10:27:09] "GET /subscribe.txt HTTP/1.1" 200 -
+2026-11-12T10:27:17.728628854Z [err]  [36mINFO[0m[0041] [[38;5;143m435571839[0m 0ms] inbound/vless[vless-in]: inbound connection from 171.43.18.113:37060
+2026-11-12T10:27:18.800071635Z [err]  [36mINFO[0m[0042] [[38;5;177m3200496801[0m 1.8s] inbound/vless[vless-in]: [0] inbound connection to www.google.com:443
+2026-11-12T10:27:18.800086325Z [err]  [36mINFO[0m[0042] [[38;5;177m3200496801[0m 1.8s] outbound/direct[direct]: outbound connection to www.google.com:443
+2026-11-12T10:27:19.772231999Z [err]  [36mINFO[0m[0043] [[38;5;229m1441924057[0m 0ms] inbound/trojan[trojan-in]: inbound connection from 171.43.18.113:37934
+2026-11-12T10:27:20.812625508Z [err]  [36mINFO[0m[0044] [[38;5;229m1441924057[0m 681ms] inbound/trojan[trojan-in]: [0] inbound connection to www.google.com:443
+2026-11-12T10:27:20.812630248Z [err]  [36mINFO[0m[0044] [[38;5;229m1441924057[0m 681ms] outbound/direct[direct]: outbound connection to www.google.com:443
+2026-11-12T10:27:20.814357733Z [err]  [36mINFO[0m[0044] [[38;5;34m4174652393[0m 0ms] inbound/vmess[vmess-in]: inbound connection from 171.43.18.113:35074
+2026-11-12T10:27:21.833464313Z [err]  [36mINFO[0m[0045] [[38;5;123m1354058092[0m 677ms] inbound/vmess[vmess-in]: [0] inbound connection to www.google.com:443
+2026-11-12T10:27:21.833468653Z [err]  [36mINFO[0m[0045] [[38;5;123m1354058092[0m 677ms] outbound/direct[direct]: outbound connection to www.google.com:443
+2026-11-12T10:27:22.821157816Z [err]  [36mINFO[0m[0046] [[38;5;200m750415288[0m 0ms] inbound/vless[vless-in]: inbound connection from 171.43.18.113:36818
+2026-11-12T10:27:22.915917679Z [err]  [36mINFO[0m[0046] [[38;5;158m3031925134[0m 285ms] inbound/vless[vless-in]: [0] inbound connection to www.google.com:443
+2026-11-12T10:27:22.915923329Z [err]  [36mINFO[0m[0046] [[38;5;158m3031925134[0m 285ms] outbound/direct[direct]: outbound connection to www.google.com:443
+2026-11-12T10:27:23.778931431Z [err]  [36mINFO[0m[0047] [[38;5;144m11472768[0m 0ms] inbound/trojan[trojan-in]: inbound connection from 171.43.18.113:37946
+2026-11-12T10:27:24.439888993Z [err]  [36mINFO[0m[0048] [[38;5;144m11472768[0m 666ms] inbound/trojan[trojan-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:24.439892453Z [err]  [36mINFO[0m[0048] [[38;5;144m11472768[0m 666ms] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:24.804549934Z [err]  [36mINFO[0m[0048] [[38;5;40m3962890735[0m 0ms] inbound/vless[vless-in]: inbound connection from 171.43.18.113:36822
+2026-11-12T10:27:24.804555864Z [err]  [36mINFO[0m[0048] [[38;5;51m2800955572[0m 179ms] inbound/vless[vless-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:24.804561433Z [err]  [36mINFO[0m[0048] [[38;5;51m2800955572[0m 179ms] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:25.275375577Z [err]  [36mINFO[0m[0049] [[38;5;165m1785459349[0m 0ms] inbound/vmess[vmess-in]: inbound connection from 171.43.18.113:35082
+2026-11-12T10:27:26.409799189Z [err]  [36mINFO[0m[0050] [[38;5;219m3940156875[0m 1.14s] inbound/vmess[vmess-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:26.409802909Z [err]  [36mINFO[0m[0050] [[38;5;219m3940156875[0m 1.14s] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:27.002862976Z [err]  [36mINFO[0m[0050] [[38;5;122m338783597[0m 0ms] inbound/vmess[vmess-in]: inbound connection from 171.43.18.113:35098
+2026-11-12T10:27:27.825181320Z [err]  [36mINFO[0m[0051] [[38;5;35m1209439466[0m 526ms] inbound/vmess[vmess-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:27.825184930Z [err]  [36mINFO[0m[0051] [[38;5;35m1209439466[0m 526ms] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:27.825189140Z [err]  [36mINFO[0m[0051] [[38;5;68m1139274548[0m 0ms] inbound/vless[vless-in]: inbound connection from 171.43.18.113:36838
+2026-11-12T10:27:28.841996489Z [err]  [36mINFO[0m[0052] [[38;5;212m1473117124[0m 962ms] inbound/vless[vless-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:28.842000119Z [err]  [36mINFO[0m[0052] [[38;5;212m1473117124[0m 962ms] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:29.903523999Z [err]  [36mINFO[0m[0053] [[38;5;195m2714372275[0m 0ms] inbound/vmess[vmess-in]: inbound connection from 171.43.18.113:35336
+2026-11-12T10:27:30.473044501Z [err]  [36mINFO[0m[0054] [[38;5;165m3777844885[0m 653ms] inbound/vmess[vmess-in]: [0] inbound connection to cachefly.cachefly.net:443
+2026-11-12T10:27:30.473049311Z [err]  [36mINFO[0m[0054] [[38;5;165m3777844885[0m 653ms] outbound/direct[direct]: outbound connection to cachefly.cachefly.net:443
